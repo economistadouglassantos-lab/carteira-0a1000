@@ -14,7 +14,7 @@ Painel pessoal de acompanhamento de carteira de investimentos.
 
 ## Como usar
 
-Acede em: **https://[o-teu-username].github.io/carteira-0a1000**
+Acede em: **https://economistadouglassantos-lab.github.io/carteira-0a1000**
 
 ## Cotações
 
