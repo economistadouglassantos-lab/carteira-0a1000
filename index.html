@@ -1070,17 +1070,42 @@
         <!-- FORM -->
         <div class="aporte-form-card">
           <h2>Registar aporte</h2>
-          <div class="form-group">
-            <label>Mês e ano</label>
-            <input type="month" id="input-mes" />
+
+          <!-- MODE TOGGLE -->
+          <div style="display:flex;gap:0;margin-bottom:18px;border:1px solid var(--border2);border-radius:8px;overflow:hidden;">
+            <button id="btn-modo-semanal" onclick="setModo('semanal')"
+              style="flex:1;padding:8px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:var(--accent);color:#fff;transition:background 0.15s;">
+              Semanal (terça)
+            </button>
+            <button id="btn-modo-mensal" onclick="setModo('mensal')"
+              style="flex:1;padding:8px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:var(--surface2);color:var(--muted);transition:background 0.15s;">
+              Mensal
+            </button>
           </div>
+
+          <!-- SEMANAL -->
+          <div id="form-semanal">
+            <div class="form-group">
+              <label>Data da terça-feira</label>
+              <input type="date" id="input-data-semana" />
+            </div>
+          </div>
+
+          <!-- MENSAL -->
+          <div id="form-mensal" style="display:none;">
+            <div class="form-group">
+              <label>Mês e ano</label>
+              <input type="month" id="input-mes" />
+            </div>
+          </div>
+
           <div class="form-group">
             <label>Valor investido (€)</label>
             <input type="number" id="input-valor" placeholder="0" min="0" step="0.01" />
           </div>
           <div class="form-group">
             <label>Nota (opcional)</label>
-            <input type="text" id="input-nota" placeholder="Ex: reforço S&P500" maxlength="60" />
+            <input type="text" id="input-nota" placeholder="Ex: reforço carteira" maxlength="60" />
           </div>
           <button class="btn-add" onclick="adicionarAporte()">+ Adicionar aporte</button>
           <div id="form-feedback" style="margin-top:10px; font-size:12px; color:var(--green); text-align:center; min-height:18px;"></div>
@@ -1093,12 +1118,12 @@
             <div class="total-card">
               <div class="t-label">Total investido</div>
               <div class="t-value" id="total-investido">€ 0</div>
-              <div class="t-sub" id="total-meses">0 meses registados</div>
+              <div class="t-sub" id="total-meses">0 registos</div>
             </div>
             <div class="total-card">
-              <div class="t-label">Média mensal</div>
+              <div class="t-label">Média por aporte</div>
               <div class="t-value" id="media-mensal">€ 0</div>
-              <div class="t-sub">por mês com aporte</div>
+              <div class="t-sub" id="media-sub">por registo</div>
             </div>
             <div class="total-card">
               <div class="t-label">Maior aporte</div>
@@ -1118,7 +1143,7 @@
           <!-- HISTORY -->
           <div class="history-card">
             <div class="history-header">
-              <span>Mês</span><span>Valor</span><span>Nota</span><span></span>
+              <span>Data</span><span>Valor</span><span>Nota</span><span></span>
             </div>
             <div id="history-list">
               <div class="empty-state">
@@ -1355,11 +1380,26 @@ function initCharts() {
 
 // ── APORTES DATA ──
 const STORAGE_KEY = 'carteira_aportes_v1';
+let modoAporte = 'semanal'; // 'semanal' | 'mensal'
+
+function setModo(modo) {
+  modoAporte = modo;
+  const isSemanal = modo === 'semanal';
+  document.getElementById('form-semanal').style.display = isSemanal ? '' : 'none';
+  document.getElementById('form-mensal').style.display  = isSemanal ? 'none' : '';
+  const btnS = document.getElementById('btn-modo-semanal');
+  const btnM = document.getElementById('btn-modo-mensal');
+  if (btnS) {
+    btnS.style.background = isSemanal ? 'var(--accent)' : 'var(--surface2)';
+    btnS.style.color      = isSemanal ? '#fff' : 'var(--muted)';
+    btnM.style.background = isSemanal ? 'var(--surface2)' : 'var(--accent)';
+    btnM.style.color      = isSemanal ? 'var(--muted)' : '#fff';
+  }
+}
 
 function loadAportes() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
 }
-
 function saveAportes(arr) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch {}
 }
@@ -1368,33 +1408,58 @@ function formatEur(v) {
   return '€ ' + Number(v).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function formatMes(ym) {
-  if (!ym) return '—';
-  const [y, m] = ym.split('-');
+// Format a date key (YYYY-MM-DD or YYYY-MM) for display
+function formatLabel(key) {
+  if (!key) return '—';
+  if (key.length === 7) {
+    // YYYY-MM — mensal
+    const [y, m] = key.split('-');
+    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    return meses[parseInt(m) - 1] + ' ' + y;
+  }
+  // YYYY-MM-DD — semanal
+  const [y, m, d] = key.split('-');
   const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  return meses[parseInt(m) - 1] + ' ' + y;
+  return d + ' ' + meses[parseInt(m) - 1] + ' ' + y + ' (Ter)';
+}
+
+function isTerca(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.getDay() === 2; // 2 = Tuesday
 }
 
 // ── ADD APORTE ──
 function adicionarAporte() {
-  const mes = document.getElementById('input-mes').value;
   const valorRaw = document.getElementById('input-valor').value;
-  const nota = document.getElementById('input-nota').value.trim();
+  const nota     = document.getElementById('input-nota').value.trim();
+  const valor    = parseFloat(valorRaw);
 
-  if (!mes) { showFeedback('Selecciona o mês.', true); return; }
-  const valor = parseFloat(valorRaw);
-  if (!valorRaw || isNaN(valor) || valor <= 0) { showFeedback('Insere um valor válido.', true); return; }
+  if (!valorRaw || isNaN(valor) || valor <= 0) {
+    showFeedback('Insere um valor válido.', true); return;
+  }
+
+  let chave;
+  if (modoAporte === 'semanal') {
+    const data = document.getElementById('input-data-semana').value;
+    if (!data) { showFeedback('Selecciona a data da terça-feira.', true); return; }
+    if (!isTerca(data)) { showFeedback('Atenção: a data seleccionada não é uma terça-feira.', true); return; }
+    chave = data; // YYYY-MM-DD
+  } else {
+    const mes = document.getElementById('input-mes').value;
+    if (!mes) { showFeedback('Selecciona o mês.', true); return; }
+    chave = mes; // YYYY-MM
+  }
 
   const arr = loadAportes();
-  const existeIdx = arr.findIndex(a => a.mes === mes);
+  const idx = arr.findIndex(a => a.mes === chave);
 
-  if (existeIdx >= 0) {
-    arr[existeIdx].valor = valor;
-    arr[existeIdx].nota = nota;
-    showFeedback('Aporte de ' + formatMes(mes) + ' actualizado.', false);
+  if (idx >= 0) {
+    arr[idx].valor = valor;
+    arr[idx].nota  = nota;
+    showFeedback('Aporte de ' + formatLabel(chave) + ' actualizado.', false);
   } else {
-    arr.push({ mes, valor, nota });
-    showFeedback('Aporte de ' + formatMes(mes) + ' adicionado!', false);
+    arr.push({ mes: chave, valor, nota, tipo: modoAporte });
+    showFeedback('Aporte adicionado!', false);
   }
 
   arr.sort((a, b) => a.mes.localeCompare(b.mes));
@@ -1403,19 +1468,20 @@ function adicionarAporte() {
   renderTotals();
   renderAportesChart();
   document.getElementById('input-valor').value = '';
-  document.getElementById('input-nota').value = '';
+  document.getElementById('input-nota').value  = '';
 }
 
 function showFeedback(msg, isErr) {
   const el = document.getElementById('form-feedback');
+  if (!el) return;
   el.textContent = msg;
   el.style.color = isErr ? 'var(--red)' : 'var(--green)';
-  setTimeout(() => { el.textContent = ''; }, 3000);
+  setTimeout(() => { el.textContent = ''; }, 3500);
 }
 
 // ── DELETE ──
-function deletarAporte(mes) {
-  let arr = loadAportes().filter(a => a.mes !== mes);
+function deletarAporte(chave) {
+  const arr = loadAportes().filter(a => a.mes !== chave);
   saveAportes(arr);
   renderHistory();
   renderTotals();
@@ -1425,54 +1491,71 @@ function deletarAporte(mes) {
 // ── RENDER HISTORY ──
 function renderHistory() {
   const arr = loadAportes();
-  const el = document.getElementById('history-list');
+  const el  = document.getElementById('history-list');
+  if (!el) return;
   if (arr.length === 0) {
     el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div>Ainda sem aportes registados.<br>Usa o formulário ao lado para começar.</div></div>';
     return;
   }
-  el.innerHTML = [...arr].reverse().map(a => `
+  el.innerHTML = [...arr].reverse().map(a => {
+    const isSem = a.tipo === 'semanal' || (a.mes && a.mes.length === 10);
+    const badge = isSem
+      ? '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(99,102,241,0.15);color:var(--accent2);margin-left:6px;">Semanal</span>'
+      : '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(20,184,166,0.12);color:#2dd4bf;margin-left:6px;">Mensal</span>';
+    return `
     <div class="history-row">
-      <div class="h-mes">${formatMes(a.mes)}</div>
+      <div class="h-mes">${formatLabel(a.mes)}${badge}</div>
       <div class="h-valor">${formatEur(a.valor)}</div>
       <div class="h-nota">${a.nota || '—'}</div>
       <button class="btn-del" onclick="deletarAporte('${a.mes}')" title="Remover">×</button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── RENDER TOTALS ──
 function renderTotals() {
-  const arr = loadAportes();
+  const arr   = loadAportes();
   const total = arr.reduce((s, a) => s + a.valor, 0);
   const media = arr.length ? total / arr.length : 0;
   const maior = arr.length ? arr.reduce((m, a) => a.valor > m.valor ? a : m, arr[0]) : null;
+  const nSem  = arr.filter(a => a.tipo === 'semanal' || (a.mes && a.mes.length === 10)).length;
+  const nMes  = arr.length - nSem;
 
-  document.getElementById('total-investido').textContent = formatEur(total);
-  document.getElementById('total-meses').textContent = arr.length + (arr.length === 1 ? ' mês registado' : ' meses registados');
-  document.getElementById('media-mensal').textContent = formatEur(media);
-  document.getElementById('maior-aporte').textContent = maior ? formatEur(maior.valor) : '€ 0';
-  document.getElementById('maior-aporte-mes').textContent = maior ? formatMes(maior.mes) : '—';
+  const elTot = document.getElementById('total-investido');
+  const elSub = document.getElementById('total-meses');
+  const elMed = document.getElementById('media-mensal');
+  const elMaior = document.getElementById('maior-aporte');
+  const elMaiorMes = document.getElementById('maior-aporte-mes');
+
+  if (elTot) elTot.textContent = formatEur(total);
+  if (elSub) {
+    const parts = [];
+    if (nSem > 0) parts.push(nSem + (nSem === 1 ? ' semanal' : ' semanais'));
+    if (nMes > 0) parts.push(nMes + (nMes === 1 ? ' mensal' : ' mensais'));
+    elSub.textContent = parts.length ? parts.join(' · ') : '0 registos';
+  }
+  if (elMed) elMed.textContent = formatEur(media);
+  if (elMaior) elMaior.textContent = maior ? formatEur(maior.valor) : '€ 0';
+  if (elMaiorMes) elMaiorMes.textContent = maior ? formatLabel(maior.mes) : '—';
 }
 
 // ── APORTES CHART ──
 let aportesChart = null;
 
 function renderAportesChart() {
-  const arr = loadAportes();
+  const arr    = loadAportes();
   const canvas = document.getElementById('chartAportes');
   if (!canvas) return;
+  if (aportesChart) { aportesChart.destroy(); aportesChart = null; }
+  if (arr.length === 0) return;
 
-  const labels = arr.map(a => formatMes(a.mes));
-  const values = arr.map(a => a.valor);
-
-  // Cumulative line
+  const labels     = arr.map(a => formatLabel(a.mes));
+  const values     = arr.map(a => a.valor);
+  const colors     = arr.map(a => (a.tipo === 'semanal' || (a.mes && a.mes.length === 10))
+    ? 'rgba(99,102,241,0.55)' : 'rgba(20,184,166,0.55)');
   const cumulative = [];
   let acc = 0;
   values.forEach(v => { acc += v; cumulative.push(parseFloat(acc.toFixed(2))); });
-
-  if (aportesChart) { aportesChart.destroy(); aportesChart = null; }
-
-  if (arr.length === 0) return;
 
   aportesChart = new Chart(canvas, {
     type: 'bar',
@@ -1480,10 +1563,10 @@ function renderAportesChart() {
       labels,
       datasets: [
         {
-          label: 'Aporte mensal',
+          label: 'Aporte',
           data: values,
-          backgroundColor: 'rgba(99,102,241,0.5)',
-          borderColor: '#6366f1',
+          backgroundColor: colors,
+          borderColor: colors.map(c => c.replace('0.55', '1')),
           borderWidth: 1,
           borderRadius: 4,
           yAxisID: 'y'
@@ -1511,17 +1594,14 @@ function renderAportesChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: ctx => {
-              const label = ctx.dataset.label || '';
-              const val = '€ ' + Number(ctx.parsed.y).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-              return ' ' + label + ': ' + val;
-            }
+            label: ctx => ' ' + ctx.dataset.label + ': € ' +
+              Number(ctx.parsed.y).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           }
         }
       },
       scales: {
         x: {
-          ticks: { color: '#6b7280', font: { size: 11 }, maxRotation: 45, autoSkip: false },
+          ticks: { color: '#6b7280', font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 20 },
           grid: { color: 'rgba(255,255,255,0.04)' }
         },
         y: {
@@ -1539,13 +1619,26 @@ function renderAportesChart() {
   });
 }
 
-// ── SET DEFAULT MONTH ──
-(function setDefaultMonth() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const el = document.getElementById('input-mes');
-  if (el) el.value = y + '-' + m;
+// ── SET DEFAULTS ──
+(function setDefaults() {
+  const now  = new Date();
+  const y    = now.getFullYear();
+  const m    = String(now.getMonth() + 1).padStart(2, '0');
+  const elM  = document.getElementById('input-mes');
+  if (elM) elM.value = y + '-' + m;
+
+  // Default to next Tuesday if today is not Tuesday
+  const elS = document.getElementById('input-data-semana');
+  if (elS) {
+    const day  = now.getDay();
+    const diff = day <= 2 ? 2 - day : 9 - day; // days until next Tuesday
+    const next = new Date(now);
+    next.setDate(now.getDate() + (diff === 0 ? 0 : diff));
+    const yy = next.getFullYear();
+    const mm = String(next.getMonth() + 1).padStart(2, '0');
+    const dd = String(next.getDate()).padStart(2, '0');
+    elS.value = `${yy}-${mm}-${dd}`;
+  }
 })();
 
 // ── INIT ──
