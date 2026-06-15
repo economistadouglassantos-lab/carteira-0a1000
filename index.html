@@ -857,8 +857,8 @@
     <div class="summary-grid" style="margin-top:8px;">
       <div class="metric-card">
         <div class="label">Total de posições</div>
-        <div class="value">17</div>
-        <div class="sub">10 acções · 4 ETF · 1 privado · 2 âncoras</div>
+        <div class="value">16</div>
+        <div class="sub">10 acções · 5 ETF · 1 privado · 2 âncoras</div>
       </div>
       <div class="metric-card">
         <div class="label">Horizonte</div>
@@ -1028,11 +1028,11 @@
         <a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/equity/9505/s-p-500-ucits-etf-usd-accumulating" target="_blank" rel="noopener">Ficha <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
       </div>
       <div class="company-row">
-        <div><div class="company-name">ETF Mercados Emergentes</div><div class="company-ticker">VWO / IEMG / VFEM (a definir)</div></div>
+        <div><div class="company-name">Vanguard FTSE Emerging Markets UCITS (Dist)</div><div class="company-ticker">VFEA · LSE</div></div>
         <div class="company-sector">Acções Emergentes Global</div>
-        <div><span class="badge badge-etf">ETF — novo</span></div>
+        <div><span class="badge badge-etf">ETF</span></div>
         <div class="weight-bar-wrap"><div class="weight-text">13%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:87%;background:#f59e0b;"></div></div></div>
-        <a class="ir-link" href="https://www.ishares.com/uk/individual/en/products/264659/IEMG" target="_blank" rel="noopener">iShares <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        <a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/equity/9680/ftse-emerging-markets-ucits-etf-distributing" target="_blank" rel="noopener">Ficha <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
       </div>
       <div class="company-row">
         <div><div class="company-name">iShares Dev. Mkts Property Yield (Dist)</div><div class="company-ticker">IWDP</div></div>
@@ -1910,21 +1910,22 @@ const COT_KEY    = 'carteira_compra_v1';
 const GS_ID_KEY  = 'carteira_gsid_v1';
 
 const PORTFOLIO_ASSETS = [
-  { name: 'Borr Drilling',           ticker: 'BORR',     row: 5,  conv: 'high',   weight: 8  },
-  { name: 'Nu Holdings',             ticker: 'NU',       row: 6,  conv: 'high',   weight: 8  },
-  { name: 'Sonae',                   ticker: 'SON.LS',   row: 7,  conv: 'high',   weight: 8  },
-  { name: 'SpaceX',                  ticker: 'SPCX',     row: 8,  conv: 'high',   weight: 8  },
-  { name: 'Sezzle',                  ticker: 'SEZL',     row: 9,  conv: 'mid',    weight: 3  },
-  { name: 'Byrna Technologies',      ticker: 'BYRN',     row: 10, conv: 'mid',    weight: 3  },
-  { name: 'Faes Farma',             ticker: 'FAE.MC',   row: 11, conv: 'mid',    weight: 3  },
-  { name: 'Embraer',                 ticker: 'ERJ',      row: 12, conv: 'mid',    weight: 3  },
-  { name: 'Flow Traders',           ticker: 'FLOW.AS',  row: 13, conv: 'mid',    weight: 3  },
-  { name: 'BNP Paribas',            ticker: 'BNP.PA',   row: 14, conv: 'mid',    weight: 3  },
-  { name: 'Navigator Company',      ticker: 'NVG.LS',   row: 15, conv: 'mid',    weight: 3  },
-  { name: 'Vanguard S&P 500',       ticker: 'VUAA.L',   row: 16, conv: 'etf',    weight: 15 },
-  { name: 'iShares Dev Property',   ticker: 'IWDP.L',   row: 17, conv: 'etf',    weight: 7  },
-  { name: 'iShares Physical Gold',  ticker: 'IGLN.L',   row: 18, conv: 'anchor', weight: 10 },
-  { name: 'Vanguard Corp Bond',     ticker: 'VUSC.L',   row: 19, conv: 'anchor', weight: 5  },
+  { name: 'Borr Drilling',                       ticker: 'BORR',    row: 5,  conv: 'high',   weight: 8  },
+  { name: 'Nu Holdings',                         ticker: 'NU',      row: 6,  conv: 'high',   weight: 8  },
+  { name: 'Sonae',                               ticker: 'SON.LS',  row: 7,  conv: 'high',   weight: 8  },
+  { name: 'SpaceX',                              ticker: 'SPCX',    row: 8,  conv: 'high',   weight: 8  },
+  { name: 'Sezzle',                              ticker: 'SEZL',    row: 9,  conv: 'mid',    weight: 3  },
+  { name: 'Byrna Technologies',                  ticker: 'BYRN',    row: 10, conv: 'mid',    weight: 3  },
+  { name: 'Faes Farma',                         ticker: 'FAE.MC',  row: 11, conv: 'mid',    weight: 3  },
+  { name: 'Embraer',                             ticker: 'ERJ',     row: 12, conv: 'mid',    weight: 3  },
+  { name: 'Flow Traders',                       ticker: 'FLOW.AS', row: 13, conv: 'mid',    weight: 3  },
+  { name: 'BNP Paribas',                        ticker: 'BNP.PA',  row: 14, conv: 'mid',    weight: 3  },
+  { name: 'Navigator Company',                  ticker: 'NVG.LS',  row: 15, conv: 'mid',    weight: 3  },
+  { name: 'Vanguard S&P 500',                   ticker: 'VUAA.L',  row: 16, conv: 'etf',    weight: 15 },
+  { name: 'Vanguard FTSE Emerging Mkts (Dist)', ticker: 'VFEA.L',  row: 17, conv: 'etf',    weight: 13 },
+  { name: 'iShares Dev Property',               ticker: 'IWDP.L',  row: 18, conv: 'etf',    weight: 7  },
+  { name: 'iShares Physical Gold',              ticker: 'IGLN.L',  row: 19, conv: 'anchor', weight: 10 },
+  { name: 'Vanguard Corp Bond',                 ticker: 'VUSC.L',  row: 20, conv: 'anchor', weight: 5  },
 ];
 
 const CONV_BADGE = {
