@@ -6,25 +6,26 @@
 <title>0 a 1000 — Painel do Investidor</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0f14;
-    --surface: #13161d;
-    --surface2: #1a1e28;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8eaf0;
+    --bg: #f2f4f7;
+    --surface: #ffffff;
+    --surface2: #eef0f4;
+    --border: rgba(0,0,0,0.09);
+    --border2: rgba(0,0,0,0.16);
+    --text: #111827;
     --muted: #6b7280;
-    --accent: #6366f1;
-    --accent2: #818cf8;
-    --green: #10b981;
-    --amber: #f59e0b;
-    --red: #ef4444;
-    --teal: #14b8a6;
-    --purple: #a78bfa;
+    --accent: #1a3a6b;
+    --accent2: #2563eb;
+    --header-bg: #1a3a6b;
+    --green: #059669;
+    --amber: #d97706;
+    --red: #dc2626;
+    --teal: #0891b2;
+    --purple: #7c3aed;
   }
 
   body {
@@ -38,73 +39,82 @@
 
   /* HEADER */
   header {
-    border-bottom: 1px solid var(--border);
-    padding: 22px 48px;
+    border-bottom: none;
+    padding: 0 48px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    background: rgba(13,15,20,0.95);
-    backdrop-filter: blur(12px);
+    background: var(--header-bg);
     z-index: 100;
+    height: 64px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
   }
 
   .logo {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 20px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--text);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #ffffff;
   }
-  .logo .zero { color: var(--muted); }
-  .logo .mil { color: var(--accent2); }
+  .logo .zero { color: rgba(255,255,255,0.5); }
+  .logo .mil { color: #60a5fa; }
 
-  .header-meta { font-size: 12px; color: var(--muted); }
+  .header-meta { font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 0.05em; text-transform: uppercase; }
 
   /* TABS */
   .tabs-bar {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 3px solid var(--accent);
     padding: 0 48px;
     display: flex;
     gap: 0;
-    background: var(--bg);
+    background: #fff;
     position: sticky;
-    top: 69px;
+    top: 64px;
     z-index: 99;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
   }
 
   .tab-btn {
-    padding: 14px 20px;
+    padding: 13px 18px;
+    font-family: 'Oswald', sans-serif;
     font-size: 13px;
     font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--muted);
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    letter-spacing: 0.01em;
+    transition: color 0.2s, border-color 0.2s, background 0.15s;
     white-space: nowrap;
   }
 
-  .tab-btn:hover { color: var(--text); }
-  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+  .tab-btn:hover { color: var(--accent); background: #f0f4ff; }
+  .tab-btn.active { color: #fff; background: var(--accent); border-bottom-color: var(--accent); }
 
   /* TAB PANELS */
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
   /* MAIN */
-  main { max-width: 1280px; margin: 0 auto; padding: 48px 48px 80px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 40px 48px 80px; }
 
   .section-label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--accent);
     margin-bottom: 20px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent2);
   }
 
   section { margin-bottom: 64px; }
@@ -120,27 +130,34 @@
   .metric-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-top: 3px solid var(--accent);
+    border-radius: 0 0 8px 8px;
     padding: 20px 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
 
   .metric-card .label {
+    font-family: 'Oswald', sans-serif;
     font-size: 11px;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
     margin-bottom: 8px;
   }
 
-  .metric-card .value {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
-
   .metric-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .metric-card:nth-child(2) { border-top-color: #059669; }
+  .metric-card:nth-child(3) { border-top-color: var(--accent2); }
+  .metric-card:nth-child(4) { border-top-color: #d97706; }
+
+  .metric-card .value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+  }
 
   /* CHARTS */
   .charts-grid {
@@ -152,16 +169,21 @@
   .chart-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
 
   .chart-card h3 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
     margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
   }
 
   .chart-wrap { position: relative; height: 220px; }
@@ -194,51 +216,86 @@
     padding: 14px 20px;
     border-radius: 10px;
     border: 1px solid transparent;
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s, border-color 0.15s;
   }
 
-  .company-row:hover { background: var(--surface2); border-color: var(--border2); }
+  .company-row:hover { background: var(--surface2); border-color: var(--border2); border-bottom-color: var(--border2); }
 
-  .company-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 500; color: var(--text); }
+  .companies-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    gap: 12px;
+    padding: 0 20px 10px;
+    font-size: 11px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .company-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 13px 20px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .company-row:hover { background: #eef2ff; border-color: #c7d2fe; border-bottom-color: #c7d2fe; }
+
+  .company-name { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.02em; color: var(--text); }
   .company-ticker { font-size: 11px; color: var(--muted); margin-top: 1px; }
   .company-sector { font-size: 12px; color: var(--muted); }
 
-  .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 6px; }
-  .badge-high { background: rgba(99,102,241,0.15); color: #818cf8; }
-  .badge-mid { background: rgba(20,184,166,0.15); color: #2dd4bf; }
-  .badge-etf { background: rgba(245,158,11,0.15); color: #fbbf24; }
-  .badge-anchor { background: rgba(107,114,128,0.2); color: #9ca3af; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.04em; font-family: 'Oswald', sans-serif; }
+  .badge-high { background: #dbeafe; color: #1e40af; }
+  .badge-mid { background: #d1fae5; color: #065f46; }
+  .badge-etf { background: #fef3c7; color: #92400e; }
+  .badge-anchor { background: #f3f4f6; color: #374151; }
 
-  .weight-text { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-  .weight-bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .weight-text { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 500; color: var(--accent); margin-bottom: 4px; }
+  .weight-bar-bg { height: 3px; background: #e5e7eb; border-radius: 2px; overflow: hidden; }
   .weight-bar-fill { height: 100%; border-radius: 2px; }
 
   .ir-link {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 12px;
+    font-size: 11px;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: var(--accent2);
     text-decoration: none;
     padding: 5px 10px;
-    border: 1px solid rgba(99,102,241,0.3);
-    border-radius: 6px;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
     transition: background 0.15s, border-color 0.15s;
     white-space: nowrap;
   }
 
-  .ir-link:hover { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.6); }
+  .ir-link:hover { background: #dbeafe; border-color: var(--accent2); }
   .ir-link svg { width: 11px; height: 11px; opacity: 0.7; }
 
   .divider { height: 1px; background: var(--border); margin: 4px 0; }
 
   .group-label {
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--accent);
     padding: 16px 20px 8px;
+    border-left: 3px solid var(--accent2);
+    margin-left: 0;
   }
 
   /* ===== APORTES TAB ===== */
@@ -259,7 +316,7 @@
   }
 
   .aporte-form-card h2 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 24px;
@@ -297,7 +354,7 @@
   }
 
   .form-group input[type="number"] {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 16px;
     font-weight: 500;
   }
@@ -309,7 +366,7 @@
     color: #fff;
     border: none;
     border-radius: 8px;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -318,7 +375,7 @@
     letter-spacing: 0.01em;
   }
 
-  .btn-add:hover { background: #4f46e5; }
+  .btn-add:hover { background: #1e40af; }
   .btn-add:active { transform: scale(0.98); }
 
   /* TOTALS STRIP */
@@ -339,7 +396,7 @@
   .total-card .t-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
 
   .total-card .t-value {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 22px;
     font-weight: 600;
     color: var(--text);
@@ -358,7 +415,7 @@
   }
 
   .aportes-chart-card h3 {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 14px;
     font-weight: 500;
     color: var(--text);
@@ -400,7 +457,7 @@
 
   .history-row .h-mes { font-size: 13px; color: var(--text); font-weight: 500; }
   .history-row .h-valor {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 14px;
     font-weight: 600;
     color: var(--green);
@@ -432,14 +489,15 @@
 
   /* FOOTER */
   footer {
-    border-top: 1px solid var(--border);
-    padding: 24px 48px;
+    border-top: 3px solid var(--accent);
+    padding: 20px 48px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: var(--header-bg);
   }
 
-  footer p { font-size: 12px; color: var(--muted); }
+  footer p { font-size: 12px; color: rgba(255,255,255,0.6); letter-spacing: 0.04em; }
 
   /* ===== CALENDÁRIO ===== */
   .cal-layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
@@ -453,7 +511,7 @@
     top: 130px;
   }
 
-  .cal-form-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 20px; color: var(--text); }
+  .cal-form-card h2 { font-family: 'Oswald', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 20px; color: var(--text); }
 
   .upcoming-banner {
     background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(20,184,166,0.08));
@@ -467,7 +525,7 @@
   }
 
   .upcoming-banner .up-days {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 32px;
     font-weight: 700;
     color: var(--accent2);
@@ -499,7 +557,7 @@
   }
 
   .mini-cal-header span {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 14px;
     font-weight: 600;
     color: var(--text);
@@ -591,7 +649,7 @@
   .event-row:hover { background: var(--surface2); }
   .event-row.past { opacity: 0.45; }
 
-  .ev-date { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); }
+  .ev-date { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); }
   .ev-date-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
   .ev-company { font-size: 13px; color: var(--text); }
   .ev-ticker { font-size: 11px; color: var(--muted); margin-top: 1px; }
@@ -690,7 +748,7 @@
 
   .cot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
 
-  .cot-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
+  .cot-name { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
   .cot-ticker-badge {
     font-size: 10px;
     font-weight: 500;
@@ -705,7 +763,7 @@
   .cot-price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
 
   .cot-price {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 22px;
     font-weight: 600;
     color: var(--text);
@@ -730,7 +788,7 @@
   .cot-pnl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
   .cot-pnl-item .pnl-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
-  .cot-pnl-item .pnl-value { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; }
+  .cot-pnl-item .pnl-value { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 500; }
   .pnl-value.profit { color: #34d399; }
   .pnl-value.loss { color: #f87171; }
   .pnl-value.neutral { color: var(--muted); }
@@ -743,7 +801,7 @@
     border: 1px solid var(--border2);
     border-radius: 6px;
     color: var(--text);
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-size: 13px;
     padding: 7px 10px;
     outline: none;
@@ -818,8 +876,181 @@
     .cot-grid { grid-template-columns: 1fr; }
   }
 
+  /* ===== RANKINGS ===== */
+  .rankings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .ranking-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .ranking-header {
+    padding: 12px 18px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ranking-header.up   { border-top: 3px solid #10b981; color: #34d399; }
+  .ranking-header.down { border-top: 3px solid #CC0000; color: #FF4444; }
+
+  .ranking-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+    transition: background 0.12s;
+  }
+  .ranking-row:last-child { border-bottom: none; }
+  .ranking-row:hover { background: var(--surface2); }
+
+  .rank-pos { font-size: 11px; color: var(--muted); width: 16px; flex-shrink: 0; }
+  .rank-name { font-size: 13px; color: var(--text); flex: 1; }
+  .rank-ticker { font-size: 11px; color: var(--muted); }
+  .rank-pct {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: right;
+  }
+  .rank-pct.up   { color: #34d399; }
+  .rank-pct.down { color: #f87171; }
+  .rank-empty { padding: 20px 18px; font-size: 12px; color: var(--muted); text-align: center; }
+
+  /* ===== BAZIN / FCD ===== */
+  .valuation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .valuation-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .valuation-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .valuation-card.compra::before  { background: #10b981; }
+  .valuation-card.neutra::before  { background: #f59e0b; }
+  .valuation-card.cara::before    { background: #ef4444; }
+  .valuation-card.fcd::before     { background: #818cf8; }
+  .valuation-card.pendente::before{ background: #6b7280; }
+
+  .val-method {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .val-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .val-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .val-row:last-child { border-bottom: none; }
+  .val-label { color: var(--muted); }
+  .val-value { font-family: 'Oswald', sans-serif; font-weight: 500; color: var(--text); }
+
+  .val-verdict {
+    margin-top: 14px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+  }
+  .val-verdict.compra  { background: rgba(16,185,129,0.12); color: #34d399; }
+  .val-verdict.neutra  { background: rgba(245,158,11,0.12);  color: #fbbf24; }
+  .val-verdict.cara    { background: rgba(239,68,68,0.10);   color: #f87171; }
+  .val-verdict.fcd     { background: rgba(129,140,248,0.12); color: #818cf8; }
+  .val-verdict.pendente{ background: rgba(107,114,128,0.12); color: #9ca3af; }
+
+  .val-input-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .val-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    padding: 6px 10px;
+    outline: none;
+    min-width: 0;
+  }
+  .val-input:focus { border-color: var(--accent); }
+  .btn-calc {
+    padding: 6px 12px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .btn-calc:hover { background: rgba(99,102,241,0.28); }
+
+  .val-disclaimer {
+    margin-top: 20px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
   @media (max-width: 900px) {
-    header, .tabs-bar { padding-left: 20px; padding-right: 20px; }
+    .rankings-grid { grid-template-columns: 1fr; }
+    .valuation-grid { grid-template-columns: 1fr; }
+  }
     main { padding: 28px 20px 60px; }
     .summary-grid { grid-template-columns: repeat(2,1fr); }
     .charts-grid { grid-template-columns: 1fr; }
@@ -876,6 +1107,27 @@
         <div class="sub">Perfil moderado-agressivo</div>
       </div>
     </div>
+
+    <!-- RANKINGS -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:4px;">
+      <div class="section-label" style="margin-bottom:0;">Rankings diários</div>
+      <div id="ranking-update" style="font-size:11px;color:var(--muted);">Dados via Google Sheets · liga na aba Cotações</div>
+    </div>
+
+    <div class="rankings-grid">
+      <div class="ranking-card">
+        <div class="ranking-header up">▲ Maiores altas do dia</div>
+        <div id="ranking-up">
+          <div class="rank-empty">Liga o Google Sheets na aba Cotações para ver os rankings.</div>
+        </div>
+      </div>
+      <div class="ranking-card">
+        <div class="ranking-header down">▼ Maiores quedas do dia</div>
+        <div id="ranking-down">
+          <div class="rank-empty">Liga o Google Sheets na aba Cotações para ver os rankings.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- TAB: ANÁLISE -->
@@ -918,6 +1170,23 @@
             <div class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Âncora 15%</div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- BAZIN / FCD -->
+    <section style="margin-top:40px;">
+      <div class="section-label">Avaliação de valor — Preço-Teto Bazin & FCD</div>
+
+      <div class="valuation-grid" id="valuation-grid">
+        <!-- Cards rendered by JS -->
+      </div>
+
+      <div class="val-disclaimer">
+        <strong>Bazin:</strong> Preço-Teto = Dividendo Anual por Acção ÷ 6%. Acção barata se Preço Actual &lt; Preço-Teto. Método conservador adequado a empresas maduras pagadoras de dividendos.
+        &nbsp;|&nbsp;
+        <strong>FCD simplificado:</strong> Valor Intrínseco = EPS × (1 + g)^5 ÷ (r − g), onde g = taxa de crescimento esperada e r = taxa de desconto (10%). Para empresas que reinvestem lucros em vez de distribuir dividendos.
+        &nbsp;|&nbsp;
+        Os valores são estimativas educativas. Introduz o preço actual para calcular o veredicto.
       </div>
     </section>
   </div>
@@ -1266,7 +1535,7 @@
       <div id="gs-setup-card" class="chart-card" style="margin-bottom:20px;">
         <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
           <div style="flex:1;min-width:260px;">
-            <p style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:500;margin:0 0 8px;">Ligação ao Google Sheets</p>
+            <p style="font-family:'Oswald',sans-serif;font-size:15px;font-weight:500;margin:0 0 8px;">Ligação ao Google Sheets</p>
             <p style="font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.6;">
               1. Importa o ficheiro <strong>.xlsx</strong> para o Google Sheets<br>
               2. Partilha como "Qualquer pessoa com o link → Visualizador"<br>
@@ -1316,8 +1585,8 @@
 </main>
 
 <footer>
-  <p>Painel pessoal · 0 a 1000 — não constitui aconselhamento financeiro.</p>
-  <p>Douglas · Porto · 2026</p>
+  <p style="font-family:'Oswald',sans-serif;letter-spacing:0.06em;text-transform:uppercase;">Economista Douglas Santos</p>
+  <p>Porto · 2026</p>
 </footer>
 
 <script>
@@ -1376,6 +1645,9 @@ function initCharts() {
     },
     options: DOUGHNUT_OPTS
   });
+
+  // Render Bazin/FCD valuation cards
+  setTimeout(renderValuationCards, 50);
 }
 
 // ── APORTES DATA ──
@@ -2119,6 +2391,26 @@ async function fetchAllQuotes() {
   const el = document.getElementById('cot-last-update');
   if (el) el.textContent = ts;
   if (btn) btn.classList.remove('loading');
+
+  // Update rankings from rendered cards
+  setTimeout(() => {
+    const map = {};
+    PORTFOLIO_ASSETS.forEach(a => {
+      const safeId  = a.ticker.replace(/[^a-zA-Z0-9]/g, '-');
+      const card    = document.getElementById('cot-body-' + safeId);
+      if (!card) return;
+      const priceEl = card.querySelector('.cot-price');
+      const chgEl   = card.querySelector('.cot-change');
+      if (!priceEl || !chgEl) return;
+      const price     = parseFloat(priceEl.textContent.replace(/[^0-9.]/g, ''));
+      const pctText   = chgEl.textContent.replace('%','').replace('+','');
+      const changePct = parseFloat(pctText);
+      if (!isNaN(price) && !isNaN(changePct)) {
+        map[a.ticker] = { name: a.name, ticker: a.ticker, price, changePct };
+      }
+    });
+    if (Object.keys(map).length > 0) renderRankings(map);
+  }, 200);
 }
 
 function initCotacoes() {
@@ -2137,6 +2429,160 @@ function fetchAllQuotesTD() {}
 function parseTimeSeries() {}
 function parseQuote() {}
 function fetchSymbol() {}
+
+// ── RANKINGS ──
+function renderRankings(quotesMap) {
+  // quotesMap: { ticker: { price, changePct, name } }
+  const entries = Object.values(quotesMap).filter(e => e.changePct != null && !isNaN(e.changePct));
+  const sorted  = [...entries].sort((a,b) => b.changePct - a.changePct);
+  const top5    = sorted.slice(0, 5);
+  const bot5    = sorted.slice(-5).reverse();
+
+  function rowHTML(e, i) {
+    const isUp  = e.changePct >= 0;
+    const sign  = isUp ? '+' : '';
+    const cls   = isUp ? 'up' : 'down';
+    return `<div class="ranking-row">
+      <span class="rank-pos">${i+1}</span>
+      <span class="rank-name">${e.name}<br><span class="rank-ticker">${e.ticker}</span></span>
+      <span class="rank-pct ${cls}">${sign}${e.changePct.toFixed(2)}%</span>
+    </div>`;
+  }
+
+  const upEl   = document.getElementById('ranking-up');
+  const downEl = document.getElementById('ranking-down');
+  if (upEl)   upEl.innerHTML   = top5.length  ? top5.map((e,i) => rowHTML(e,i)).join('') : '<div class="rank-empty">Sem dados.</div>';
+  if (downEl) downEl.innerHTML = bot5.length   ? bot5.map((e,i) => rowHTML(e,i)).join('') : '<div class="rank-empty">Sem dados.</div>';
+  const el = document.getElementById('ranking-update');
+  if (el) el.textContent = 'Actualizado: ' + new Date().toLocaleTimeString('pt-PT', {hour:'2-digit',minute:'2-digit'});
+}
+
+// ── BAZIN / FCD ──
+const BAZIN_KEY = 'carteira_valuation_v1';
+
+// Companies with dividends → Bazin
+// Companies without → FCD simplificado
+const VALUATION_DATA = [
+  // Pagam dividendos — Bazin
+  { ticker:'BNP.PA',  name:'BNP Paribas',       method:'bazin', dpa:5.16,  price:null, currency:'EUR', note:'Dividendo 2025 €5.16/acção' },
+  { ticker:'NVG.LS',  name:'Navigator Company',  method:'bazin', dpa:0.25,  price:null, currency:'EUR', note:'Dividendo 2025 €0.25/acção' },
+  { ticker:'FAE.MC',  name:'Faes Farma',         method:'bazin', dpa:0.18,  price:null, currency:'EUR', note:'Dividendo 2025 €0.18/acção' },
+  { ticker:'SON.LS',  name:'Sonae',              method:'bazin', dpa:0.06,  price:null, currency:'EUR', note:'Dividendo 2025 €0.06/acção' },
+  { ticker:'FLOW.AS', name:'Flow Traders',       method:'bazin', dpa:1.15,  price:null, currency:'EUR', note:'Dividendo estimado 2025 €1.15/acção' },
+  // Não pagam dividendos — FCD simplificado
+  { ticker:'BORR',    name:'Borr Drilling',      method:'fcd',   eps:0.17,  g:0.12, note:'EPS TTM $0.17 · crescimento esperado 12%' },
+  { ticker:'NU',      name:'Nu Holdings',        method:'fcd',   eps:0.72,  g:0.28, note:'EPS TTM $0.72 · crescimento esperado 28%' },
+  { ticker:'SEZL',    name:'Sezzle',             method:'fcd',   eps:3.72,  g:0.30, note:'EPS TTM $3.72 · crescimento esperado 30%' },
+  { ticker:'BYRN',    name:'Byrna Technologies', method:'fcd',   eps:0.66,  g:0.20, note:'EPS TTM $0.66 · crescimento esperado 20%' },
+  { ticker:'ERJ',     name:'Embraer',            method:'fcd',   eps:2.16,  g:0.17, note:'EPS TTM $2.16 · crescimento esperado 17%' },
+  { ticker:'SPCX',    name:'SpaceX',             method:'fcd',   eps:null,  g:null, note:'Empresa privada — dados não disponíveis' },
+];
+
+const TAXA_DESCONTO = 0.10; // 10%
+
+function calcBazin(dpa) {
+  return dpa / 0.06;
+}
+
+function calcFCD(eps, g, anos=5) {
+  if (!eps || !g) return null;
+  const r = TAXA_DESCONTO;
+  if (r <= g) return eps * 50; // fallback
+  // Gordon simplificado: soma de lucros descontados + valor terminal
+  let soma = 0;
+  for (let i = 1; i <= anos; i++) soma += (eps * Math.pow(1+g, i)) / Math.pow(1+r, i);
+  const terminal = (eps * Math.pow(1+g, anos) * (1+0.04)) / ((r - 0.04) * Math.pow(1+r, anos));
+  return soma + terminal;
+}
+
+function verdict(current, teto, method) {
+  if (!current || !teto) return { cls:'pendente', label:'Insere o preço actual' };
+  const margin = ((teto - current) / teto) * 100;
+  if (method === 'fcd') {
+    if (margin > 20)  return { cls:'compra',  label:'Subvalorizada — margem de ' + margin.toFixed(0) + '%' };
+    if (margin > 0)   return { cls:'neutra',  label:'Próxima do valor intrínseco' };
+    return             { cls:'cara',    label:'Sobrevalorizada — ' + Math.abs(margin).toFixed(0) + '% acima' };
+  }
+  if (margin > 15)  return { cls:'compra',  label:'Abaixo do teto — compra!' };
+  if (margin > 0)   return { cls:'neutra',  label:'Perto do teto — atenção' };
+  return             { cls:'cara',    label:'Acima do teto — cara' };
+}
+
+function loadValuationPrices() {
+  try { return JSON.parse(localStorage.getItem(BAZIN_KEY)) || {}; } catch { return {}; }
+}
+function saveValuationPrice(ticker, price) {
+  const d = loadValuationPrices();
+  d[ticker] = price;
+  try { localStorage.setItem(BAZIN_KEY, JSON.stringify(d)); } catch {}
+}
+
+function calcValuation(ticker) {
+  const input = document.getElementById('val-input-' + ticker.replace(/[^a-zA-Z0-9]/g,'-'));
+  if (!input) return;
+  const price = parseFloat(input.value);
+  if (!price || isNaN(price)) return;
+  saveValuationPrice(ticker, price);
+  renderValuationCards();
+}
+
+function renderValuationCards() {
+  const grid   = document.getElementById('valuation-grid');
+  if (!grid) return;
+  const prices = loadValuationPrices();
+
+  grid.innerHTML = VALUATION_DATA.map(d => {
+    const safeId  = d.ticker.replace(/[^a-zA-Z0-9]/g, '-');
+    const current = prices[d.ticker] || null;
+    let teto, tetoLabel, metodoLabel;
+
+    if (d.method === 'bazin') {
+      teto       = calcBazin(d.dpa);
+      tetoLabel  = d.currency + ' ' + teto.toFixed(2);
+      metodoLabel= 'Preço-Teto de Bazin';
+    } else if (d.eps && d.g) {
+      teto       = calcFCD(d.eps, d.g);
+      tetoLabel  = '$ ' + (teto ? teto.toFixed(2) : '—');
+      metodoLabel= 'FCD simplificado';
+    } else {
+      teto       = null;
+      tetoLabel  = '—';
+      metodoLabel= 'FCD';
+    }
+
+    const v = verdict(current, teto, d.method);
+
+    const rows = d.method === 'bazin' ? `
+      <div class="val-row"><span class="val-label">Dividendo anual/acção</span><span class="val-value">${d.currency} ${d.dpa.toFixed(3)}</span></div>
+      <div class="val-row"><span class="val-label">Preço-Teto (÷6%)</span><span class="val-value">${tetoLabel}</span></div>
+      <div class="val-row"><span class="val-label">Preço actual</span><span class="val-value">${current ? (d.currency + ' ' + current.toFixed(2)) : '—'}</span></div>
+    ` : d.eps ? `
+      <div class="val-row"><span class="val-label">EPS (TTM)</span><span class="val-value">$ ${d.eps.toFixed(2)}</span></div>
+      <div class="val-row"><span class="val-label">Crescimento esperado</span><span class="val-value">${(d.g*100).toFixed(0)}% /ano</span></div>
+      <div class="val-row"><span class="val-label">Valor intrínseco (FCD)</span><span class="val-value">${tetoLabel}</span></div>
+      <div class="val-row"><span class="val-label">Preço actual</span><span class="val-value">${current ? ('$ ' + current.toFixed(2)) : '—'}</span></div>
+    ` : `
+      <div class="val-row"><span class="val-label">Dados</span><span class="val-value" style="color:var(--muted)">Indisponíveis</span></div>
+    `;
+
+    return `
+    <div class="valuation-card ${v.cls}">
+      <div class="val-method">${metodoLabel}</div>
+      <div class="val-name">${d.name}</div>
+      ${rows}
+      <div class="val-verdict ${v.cls}">${v.label}</div>
+      <div class="val-input-row">
+        <input class="val-input" type="number" id="val-input-${safeId}"
+          placeholder="Preço actual (${d.method === 'bazin' ? d.currency : '$'})"
+          value="${current || ''}" step="0.01" min="0" />
+        <button class="btn-calc" onclick="calcValuation('${d.ticker}')">Calcular</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;">${d.note}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── BAZIN init integrated into initCharts above ──
 </script>
 </body>
 </html>
