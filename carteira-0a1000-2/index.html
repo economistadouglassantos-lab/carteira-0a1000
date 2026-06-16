@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0 a 1000 — Painel do Investidor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --teal: #14b8a6;
+    --purple: #a78bfa;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 22px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(13,15,20,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .logo .zero { color: var(--muted); }
+  .logo .mil { color: var(--accent2); }
+
+  .header-meta { font-size: 12px; color: var(--muted); }
+
+  /* TABS */
+  .tabs-bar {
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    gap: 0;
+    background: var(--bg);
+    position: sticky;
+    top: 69px;
+    z-index: 99;
+  }
+
+  .tab-btn {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+  /* TAB PANELS */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* MAIN */
+  main { max-width: 1280px; margin: 0 auto; padding: 48px 48px 80px; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  section { margin-bottom: 64px; }
+
+  /* SUMMARY CARDS */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 64px;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+
+  .metric-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+
+  .metric-card .value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .metric-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* CHARTS */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .chart-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .chart-wrap { position: relative; height: 220px; }
+
+  .legend { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* COMPANY TABLE */
+  .companies-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    gap: 12px;
+    padding: 0 20px 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .company-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 100px;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .company-row:hover { background: var(--surface2); border-color: var(--border2); }
+
+  .company-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 500; color: var(--text); }
+  .company-ticker { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .company-sector { font-size: 12px; color: var(--muted); }
+
+  .badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 6px; }
+  .badge-high { background: rgba(99,102,241,0.15); color: #818cf8; }
+  .badge-mid { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+  .badge-etf { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .badge-anchor { background: rgba(107,114,128,0.2); color: #9ca3af; }
+
+  .weight-text { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .weight-bar-bg { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .weight-bar-fill { height: 100%; border-radius: 2px; }
+
+  .ir-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--accent2);
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 6px;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+
+  .ir-link:hover { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.6); }
+  .ir-link svg { width: 11px; height: 11px; opacity: 0.7; }
+
+  .divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  .group-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 16px 20px 8px;
+  }
+
+  /* ===== APORTES TAB ===== */
+  .aportes-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .aporte-form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    position: sticky;
+    top: 130px;
+  }
+
+  .aporte-form-card h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--accent);
+  }
+
+  .form-group input[type="number"] {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .btn-add {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-add:hover { background: #4f46e5; }
+  .btn-add:active { transform: scale(0.98); }
+
+  /* TOTALS STRIP */
+  .totals-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .total-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+
+  .total-card .t-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+  .total-card .t-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .total-card .t-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* CHART APORTES */
+  .aportes-chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .aportes-chart-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .aportes-chart-wrap { position: relative; height: 200px; }
+
+  /* HISTORY TABLE */
+  .history-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .history-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 40px;
+    padding: 12px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .history-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 40px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.12s;
+  }
+
+  .history-row:last-child { border-bottom: none; }
+  .history-row:hover { background: var(--surface2); }
+
+  .history-row .h-mes { font-size: 13px; color: var(--text); font-weight: 500; }
+  .history-row .h-valor {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+  }
+  .history-row .h-nota { font-size: 12px; color: var(--muted); }
+
+  .btn-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+
+  .btn-del:hover { color: var(--red); background: rgba(239,68,68,0.1); }
+
+  .empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .empty-state .empty-icon { font-size: 28px; margin-bottom: 10px; opacity: 0.4; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer p { font-size: 12px; color: var(--muted); }
+
+  /* ===== CALENDÁRIO ===== */
+  .cal-layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+
+  .cal-form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: sticky;
+    top: 130px;
+  }
+
+  .cal-form-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 20px; color: var(--text); }
+
+  .upcoming-banner {
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(20,184,166,0.08));
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .upcoming-banner .up-days {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 48px;
+    text-align: center;
+  }
+
+  .upcoming-banner .up-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
+  .upcoming-banner .up-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .upcoming-banner .up-date { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  /* Mini calendar */
+  .mini-cal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .mini-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .mini-cal-header span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .cal-nav-btn {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .cal-nav-btn:hover { background: var(--surface2); color: var(--text); }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+
+  .cal-day-name {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    padding: 4px 0;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--muted);
+    border-radius: 6px;
+    position: relative;
+    cursor: default;
+  }
+
+  .cal-day.other-month { opacity: 0.25; }
+  .cal-day.today { background: var(--surface2); color: var(--text); font-weight: 600; }
+  .cal-day.has-event { color: var(--text); cursor: pointer; }
+  .cal-day.has-event::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent2);
+  }
+  .cal-day.has-event.confirmed::after { background: var(--green); }
+  .cal-day.has-event:hover { background: var(--surface2); }
+
+  /* Events list */
+  .events-list { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+
+  .events-list-header {
+    display: grid;
+    grid-template-columns: 110px 1fr 90px 120px 36px;
+    gap: 10px;
+    padding: 12px 18px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .event-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 90px 120px 36px;
+    gap: 10px;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.12s;
+  }
+
+  .event-row:last-child { border-bottom: none; }
+  .event-row:hover { background: var(--surface2); }
+  .event-row.past { opacity: 0.45; }
+
+  .ev-date { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; color: var(--text); }
+  .ev-date-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .ev-company { font-size: 13px; color: var(--text); }
+  .ev-ticker { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .ev-type { font-size: 11px; color: var(--muted); }
+
+  .ev-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 8px; border-radius: 6px; }
+  .ev-status.confirmed { background: rgba(16,185,129,0.12); color: #34d399; }
+  .ev-status.estimated { background: rgba(245,158,11,0.12); color: #fbbf24; }
+  .ev-status.past { background: rgba(107,114,128,0.15); color: #9ca3af; }
+
+  .gcal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(99,102,241,0.25);
+    background: none;
+    cursor: pointer;
+    color: var(--accent2);
+    font-size: 14px;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+  .gcal-btn:hover { background: rgba(99,102,241,0.12); }
+
+  .ev-section-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 18px 6px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media (max-width: 900px) {
+    .cal-layout { grid-template-columns: 1fr; }
+    .cal-form-card { position: static; }
+    .events-list-header { display: none; }
+    .event-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  }
+
+  /* ===== COTAÇÕES ===== */
+  .cotacoes-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .cotacoes-meta { font-size: 12px; color: var(--muted); }
+  .cotacoes-meta span { color: var(--text); font-weight: 500; }
+
+  .btn-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn-refresh:hover { background: rgba(99,102,241,0.12); border-color: var(--accent); color: var(--accent2); }
+  .btn-refresh.loading { opacity: 0.6; pointer-events: none; }
+  .btn-refresh svg { transition: transform 0.6s; }
+  .btn-refresh.loading svg { animation: spin 1s linear infinite; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .cot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
+
+  .cot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    transition: border-color 0.15s;
+  }
+
+  .cot-card:hover { border-color: var(--border2); }
+
+  .cot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+
+  .cot-name { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
+  .cot-ticker-badge {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: var(--surface2);
+    color: var(--muted);
+    margin-top: 3px;
+    display: inline-block;
+  }
+
+  .cot-price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+
+  .cot-price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .cot-currency { font-size: 12px; color: var(--muted); }
+
+  .cot-change {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 5px;
+  }
+
+  .cot-change.up { background: rgba(16,185,129,0.12); color: #34d399; }
+  .cot-change.down { background: rgba(239,68,68,0.1); color: #f87171; }
+  .cot-change.flat { background: rgba(107,114,128,0.15); color: #9ca3af; }
+
+  .cot-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  .cot-pnl-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .cot-pnl-item .pnl-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .cot-pnl-item .pnl-value { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; }
+  .pnl-value.profit { color: #34d399; }
+  .pnl-value.loss { color: #f87171; }
+  .pnl-value.neutral { color: var(--muted); }
+
+  .cot-input-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+
+  .cot-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+
+  .cot-input:focus { border-color: var(--accent); }
+  .cot-input::placeholder { color: var(--muted); font-size: 12px; }
+
+  .btn-save-price {
+    padding: 7px 12px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+
+  .btn-save-price:hover { background: rgba(99,102,241,0.25); }
+
+  .cot-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 0;
+  }
+
+  .cot-loading-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .cot-loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .cot-loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  .cot-error { font-size: 11px; color: #f87171; margin-top: 4px; }
+
+  .cot-weight-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 500;
+  }
+
+  .cot-weight-high { background: rgba(129,140,248,0.15); color: #818cf8; }
+  .cot-weight-mid  { background: rgba(20,184,166,0.12); color: #2dd4bf; }
+  .cot-weight-etf  { background: rgba(245,158,11,0.12); color: #fbbf24; }
+  .cot-weight-anchor { background: rgba(107,114,128,0.15); color: #9ca3af; }
+
+  .cot-disclaimer {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .cot-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 900px) {
+    header, .tabs-bar { padding-left: 20px; padding-right: 20px; }
+    main { padding: 28px 20px 60px; }
+    .summary-grid { grid-template-columns: repeat(2,1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .companies-header { display: none; }
+    .company-row { grid-template-columns: 1fr; gap: 8px; }
+    .aportes-layout { grid-template-columns: 1fr; }
+    .aporte-form-card { position: static; }
+    .totals-strip { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="zero">0</span> a <span class="mil">1000</span></div>
+  <div style="display:flex; gap:0;">
+  </div>
+  <div class="header-meta">Carteira pessoal · Porto · 2026</div>
+</header>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('resumo', this)">Resumo</button>
+  <button class="tab-btn" onclick="switchTab('analise', this)">Análise</button>
+  <button class="tab-btn" onclick="switchTab('empresas', this)">Empresas</button>
+  <button class="tab-btn" onclick="switchTab('etfs', this)">ETFs & Âncoras</button>
+  <button class="tab-btn" onclick="switchTab('aportes', this)">Aportes mensais</button>
+  <button class="tab-btn" onclick="switchTab('calendario', this)">Calendário IR</button>
+  <button class="tab-btn" onclick="switchTab('cotacoes', this)">Cotações</button>
+</div>
+
+<main>
+
+  <!-- TAB: RESUMO -->
+  <div id="tab-resumo" class="tab-panel active">
+    <div class="summary-grid" style="margin-top:8px;">
+      <div class="metric-card">
+        <div class="label">Total de posições</div>
+        <div class="value">17</div>
+        <div class="sub">10 acções · 4 ETF · 1 privado · 2 âncoras</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Horizonte</div>
+        <div class="value">15 anos</div>
+        <div class="sub">Objectivo: crescimento de capital</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Alta convicção</div>
+        <div class="value">32%</div>
+        <div class="sub">Borr · Nu · Sonae · SpaceX @ 8% cada</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Drawdown máx. tolerado</div>
+        <div class="value">20%</div>
+        <div class="sub">Perfil moderado-agressivo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ANÁLISE -->
+  <div id="tab-analise" class="tab-panel">
+    <section style="margin-top:8px;">
+      <div class="section-label">Análise da carteira</div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Exposição regional</h3>
+          <div class="chart-wrap"><canvas id="chartRegional" role="img" aria-label="Divisão regional da carteira">Global 40%, Europa 30%, EUA 20%, Brasil 5%, Privado 5%</canvas></div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>Global 40%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#14b8a6"></span>Europa 30%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>EUA 20%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Brasil 5%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Privado 5%</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Divisão por sector</h3>
+          <div class="chart-wrap"><canvas id="chartSector" role="img" aria-label="Divisão por sector">ETF 35%, Fintech 16%, etc.</canvas></div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>ETF/Índices 35%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#14b8a6"></span>Fintech 16%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Aero/Defesa 8%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#10b981"></span>Farmacêutico 8%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Energia 8%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#fb923c"></span>Imobiliário 7%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#34d399"></span>Papel 8%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#60a5fa"></span>Outros 10%</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Por tese de investimento</h3>
+          <div class="chart-wrap"><canvas id="chartTese" role="img" aria-label="Por tese de investimento">Alta convicção 32%, ETF 35%, Moderada 18%, Âncora 15%</canvas></div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#818cf8"></span>Alta convicção 32%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>ETF estrutural 35%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#14b8a6"></span>Conv. moderada 18%</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Âncora 15%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TAB: EMPRESAS -->
+  <div id="tab-empresas" class="tab-panel">
+    <section style="margin-top:8px;">
+      <div class="section-label">Acções individuais — relatórios ao investidor</div>
+      <div class="companies-header">
+        <span>Empresa</span><span>Sector</span><span>Convicção</span><span>Peso proposto</span><span>IR</span>
+      </div>
+      <div class="group-label">Alta convicção — 8% cada</div>
+      <div class="company-row">
+        <div><div class="company-name">Borr Drilling</div><div class="company-ticker">NYSE: BORR · OSE: BORR</div></div>
+        <div class="company-sector">Energia — Offshore Drilling</div>
+        <div><span class="badge badge-high">Alta</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#818cf8;"></div></div></div>
+        <a class="ir-link" href="https://www.borrdrilling.com/investor-relations" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Nu Holdings</div><div class="company-ticker">NYSE: NU</div></div>
+        <div class="company-sector">Fintech — Neobank</div>
+        <div><span class="badge badge-high">Alta</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#818cf8;"></div></div></div>
+        <a class="ir-link" href="https://ir.nu.com.br/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Sonae</div><div class="company-ticker">ELI: SON</div></div>
+        <div class="company-sector">Retalho / Conglomerado</div>
+        <div><span class="badge badge-high">Alta</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#818cf8;"></div></div></div>
+        <a class="ir-link" href="https://www.sonae.pt/en/investors/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">SpaceX</div><div class="company-ticker">NASDAQ: SPCX (IPO Jun 2026)</div></div>
+        <div class="company-sector">Aeroespacial — Privado</div>
+        <div><span class="badge badge-high">Alta</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#818cf8;"></div></div></div>
+        <a class="ir-link" href="https://ir.spacex.com/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="divider"></div>
+      <div class="group-label">Convicção moderada — 3% cada</div>
+      <div class="company-row">
+        <div><div class="company-name">Sezzle</div><div class="company-ticker">NASDAQ: SEZL</div></div>
+        <div class="company-sector">Fintech — BNPL</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://investors.sezzle.com/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Byrna Technologies</div><div class="company-ticker">NASDAQ: BYRN</div></div>
+        <div class="company-sector">Defesa não-letal</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://ir.byrna.com/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Faes Farma</div><div class="company-ticker">BME: FAE</div></div>
+        <div class="company-sector">Farmacêutico</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://www.faesfarma.com/en/investors/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Embraer</div><div class="company-ticker">NYSE: ERJ · B3: EMBR3</div></div>
+        <div class="company-sector">Aeroespacial</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://ri.embraer.com.br/en/" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Flow Traders</div><div class="company-ticker">ENXTAM: FLOW</div></div>
+        <div class="company-sector">Trading — Market Maker ETF</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://www.flowtraders.com/investors" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">BNP Paribas</div><div class="company-ticker">ENXTPA: BNP</div></div>
+        <div class="company-sector">Banca</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://invest.bnpparibas/en" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Navigator Company</div><div class="company-ticker">ELI: NVG · PSI-20</div></div>
+        <div class="company-sector">Pasta e Papel</div>
+        <div><span class="badge badge-mid">Moderada</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#14b8a6;"></div></div></div>
+        <a class="ir-link" href="https://www.thenavigatorcompany.com/investor-relations" target="_blank" rel="noopener">IR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+    </section>
+  </div>
+
+  <!-- TAB: ETFs -->
+  <div id="tab-etfs" class="tab-panel">
+    <section style="margin-top:8px;">
+      <div class="section-label">ETFs, âncoras e instrumentos estruturais</div>
+      <div class="companies-header">
+        <span>Instrumento</span><span>Classe</span><span>Tipo</span><span>Peso proposto</span><span>IR / Ficha</span>
+      </div>
+      <div class="group-label">ETF estrutural — motor de crescimento</div>
+      <div class="company-row">
+        <div><div class="company-name">Vanguard S&P 500 UCITS (ACC)</div><div class="company-ticker">VUSA / VUAA</div></div>
+        <div class="company-sector">Acções EUA Large Cap</div>
+        <div><span class="badge badge-etf">ETF</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">15%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#f59e0b;"></div></div></div>
+        <a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/equity/9505/s-p-500-ucits-etf-usd-accumulating" target="_blank" rel="noopener">Ficha <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">ETF Mercados Emergentes</div><div class="company-ticker">VWO / IEMG / VFEM (a definir)</div></div>
+        <div class="company-sector">Acções Emergentes Global</div>
+        <div><span class="badge badge-etf">ETF — novo</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">13%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:87%;background:#f59e0b;"></div></div></div>
+        <a class="ir-link" href="https://www.ishares.com/uk/individual/en/products/264659/IEMG" target="_blank" rel="noopener">iShares <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">iShares Dev. Mkts Property Yield (Dist)</div><div class="company-ticker">IWDP</div></div>
+        <div class="company-sector">Imobiliário — REIT Global</div>
+        <div><span class="badge badge-etf">ETF</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">7%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:47%;background:#f59e0b;"></div></div></div>
+        <a class="ir-link" href="https://www.ishares.com/uk/individual/en/products/251780/IWDP" target="_blank" rel="noopener">Ficha <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="divider"></div>
+      <div class="group-label">Âncoras — preservação e amortecedor de volatilidade</div>
+      <div class="company-row">
+        <div><div class="company-name">iShares Physical Gold ETC</div><div class="company-ticker">SGLN / IGLN</div></div>
+        <div class="company-sector">Ouro físico</div>
+        <div><span class="badge badge-anchor">Âncora</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">10%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:67%;background:#6b7280;"></div></div></div>
+        <a class="ir-link" href="https://www.ishares.com/uk/individual/en/products/258441/SGLN" target="_blank" rel="noopener">Ficha <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+      <div class="company-row">
+        <div><div class="company-name">Vanguard USD Corporate 1-3Y Bond (Dist)</div><div class="company-ticker">VCSH / VUSC</div></div>
+        <div class="company-sector">Obrigações Curto Prazo USD</div>
+        <div><span class="badge badge-anchor">Âncora</span></div>
+        <div class="weight-bar-wrap"><div class="weight-text">5%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:33%;background:#6b7280;"></div></div></div>
+        <a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/bond/9534/usd-corporate-1-3-year-bond-ucits-etf-distributing" target="_blank" rel="noopener">Ficha <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+      </div>
+    </section>
+  </div>
+
+  <!-- TAB: APORTES -->
+  <div id="tab-aportes" class="tab-panel">
+    <div style="margin-top:8px;">
+      <div class="section-label">Aportes mensais</div>
+
+      <div class="aportes-layout">
+
+        <!-- FORM -->
+        <div class="aporte-form-card">
+          <h2>Registar aporte</h2>
+          <div class="form-group">
+            <label>Mês e ano</label>
+            <input type="month" id="input-mes" />
+          </div>
+          <div class="form-group">
+            <label>Valor investido (€)</label>
+            <input type="number" id="input-valor" placeholder="0" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label>Nota (opcional)</label>
+            <input type="text" id="input-nota" placeholder="Ex: reforço S&P500" maxlength="60" />
+          </div>
+          <button class="btn-add" onclick="adicionarAporte()">+ Adicionar aporte</button>
+          <div id="form-feedback" style="margin-top:10px; font-size:12px; color:var(--green); text-align:center; min-height:18px;"></div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div>
+          <!-- TOTALS -->
+          <div class="totals-strip">
+            <div class="total-card">
+              <div class="t-label">Total investido</div>
+              <div class="t-value" id="total-investido">€ 0</div>
+              <div class="t-sub" id="total-meses">0 meses registados</div>
+            </div>
+            <div class="total-card">
+              <div class="t-label">Média mensal</div>
+              <div class="t-value" id="media-mensal">€ 0</div>
+              <div class="t-sub">por mês com aporte</div>
+            </div>
+            <div class="total-card">
+              <div class="t-label">Maior aporte</div>
+              <div class="t-value" id="maior-aporte">€ 0</div>
+              <div class="t-sub" id="maior-aporte-mes">—</div>
+            </div>
+          </div>
+
+          <!-- CHART -->
+          <div class="aportes-chart-card">
+            <h3>Evolução dos aportes</h3>
+            <div class="aportes-chart-wrap">
+              <canvas id="chartAportes" role="img" aria-label="Gráfico de evolução dos aportes mensais">Sem dados ainda.</canvas>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="history-card">
+            <div class="history-header">
+              <span>Mês</span><span>Valor</span><span>Nota</span><span></span>
+            </div>
+            <div id="history-list">
+              <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <div>Ainda sem aportes registados.<br>Usa o formulário ao lado para começar.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: CALENDÁRIO -->
+  <div id="tab-calendario" class="tab-panel">
+    <div style="margin-top:8px;">
+      <div class="section-label">Calendário de relatórios ao investidor</div>
+
+      <!-- PRÓXIMO EVENTO -->
+      <div id="upcoming-banner" class="upcoming-banner" style="margin-bottom:20px;">
+        <div>
+          <div class="up-days" id="up-days">—</div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;">dias</div>
+        </div>
+        <div>
+          <div class="up-label">Próximo relatório</div>
+          <div class="up-name" id="up-name">A carregar…</div>
+          <div class="up-date" id="up-date"></div>
+        </div>
+      </div>
+
+      <div class="cal-layout">
+
+        <!-- LEFT: mini cal + form -->
+        <div>
+          <!-- MINI CALENDAR -->
+          <div class="mini-cal">
+            <div class="mini-cal-header">
+              <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+              <span id="cal-month-label"></span>
+              <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+            </div>
+            <div class="cal-grid" id="cal-grid">
+              <div class="cal-day-name">Seg</div>
+              <div class="cal-day-name">Ter</div>
+              <div class="cal-day-name">Qua</div>
+              <div class="cal-day-name">Qui</div>
+              <div class="cal-day-name">Sex</div>
+              <div class="cal-day-name">Sáb</div>
+              <div class="cal-day-name">Dom</div>
+            </div>
+            <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;"></span>Confirmado
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--accent2);display:inline-block;"></span>Estimado
+              </div>
+            </div>
+          </div>
+
+          <!-- ADD EVENT FORM -->
+          <div class="cal-form-card">
+            <h2>Adicionar evento</h2>
+            <div class="form-group">
+              <label>Empresa / instrumento</label>
+              <input type="text" id="ev-empresa" placeholder="Ex: Sezzle" />
+            </div>
+            <div class="form-group">
+              <label>Tipo de evento</label>
+              <select id="ev-tipo">
+                <option value="Resultados trimestrais">Resultados trimestrais</option>
+                <option value="Resultados semestrais">Resultados semestrais</option>
+                <option value="Resultados anuais">Resultados anuais</option>
+                <option value="Assembleia geral">Assembleia geral</option>
+                <option value="Capital markets day">Capital markets day</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Data</label>
+              <input type="date" id="ev-data" />
+            </div>
+            <div class="form-group">
+              <label>Estado</label>
+              <select id="ev-estado">
+                <option value="confirmed">Confirmado</option>
+                <option value="estimated">Estimado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ticker (opcional)</label>
+              <input type="text" id="ev-ticker" placeholder="Ex: SEZL" />
+            </div>
+            <button class="btn-add" onclick="adicionarEvento()">+ Adicionar ao calendário</button>
+            <div id="ev-feedback" style="margin-top:10px;font-size:12px;color:var(--green);text-align:center;min-height:18px;"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT: events list -->
+        <div>
+          <div class="events-list">
+            <div class="events-list-header">
+              <span>Data</span><span>Empresa</span><span>Tipo</span><span>Estado</span><span></span>
+            </div>
+            <div id="events-list-body"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: COTAÇÕES -->
+  <div id="tab-cotacoes" class="tab-panel">
+    <div style="margin-top:8px;">
+
+      <!-- SETUP CARD -->
+      <div id="gs-setup-card" class="chart-card" style="margin-bottom:20px;">
+        <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:260px;">
+            <p style="font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:500;margin:0 0 8px;">Ligação ao Google Sheets</p>
+            <p style="font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.6;">
+              1. Importa o ficheiro <strong>.xlsx</strong> para o Google Sheets<br>
+              2. Partilha como "Qualquer pessoa com o link → Visualizador"<br>
+              3. Copia o ID do URL e cola aqui abaixo
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input type="text" id="gs-sheet-id" placeholder="ID da folha (ex: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms)"
+                style="flex:1;min-width:200px;font-size:12px;font-family:monospace;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:9px 12px;outline:none;" />
+              <button class="btn-add" style="width:auto;padding:9px 18px;margin:0;" onclick="ligarGSheets()">Ligar</button>
+            </div>
+            <div id="gs-status" style="font-size:12px;margin-top:8px;min-height:16px;"></div>
+          </div>
+          <div style="flex-shrink:0;background:var(--surface2);border-radius:10px;padding:14px 18px;font-size:12px;color:var(--muted);line-height:1.8;">
+            <div style="font-weight:500;color:var(--text);margin-bottom:6px;">Como encontrar o ID</div>
+            <div>URL: <span style="font-family:monospace;color:var(--accent2);">docs.google.com/spreadsheets/d/<strong style="color:#f59e0b;">[ID]</strong>/edit</span></div>
+            <div style="margin-top:6px;">O ID é a parte entre <code style="background:var(--surface);padding:1px 4px;border-radius:3px;">/d/</code> e <code style="background:var(--surface);padding:1px 4px;border-radius:3px;">/edit</code></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="cotacoes-toolbar" id="gs-toolbar" style="display:none;">
+        <div>
+          <div class="section-label" style="margin-bottom:4px;">Cotações via Google Sheets</div>
+          <div class="cotacoes-meta">Dados via GOOGLEFINANCE · Última actualização: <span id="cot-last-update">—</span></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn-refresh" id="btn-refresh" onclick="fetchAllQuotes()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            Actualizar
+          </button>
+          <button onclick="desligarGSheets()" style="background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;padding:7px 12px;cursor:pointer;">Alterar folha</button>
+        </div>
+      </div>
+
+      <div class="cot-grid" id="cot-grid"></div>
+
+      <div class="cot-disclaimer" id="gs-disclaimer" style="display:none;">
+        Os preços são fornecidos via <strong>GOOGLEFINANCE</strong> no Google Sheets. Delay típico de 15-20 min. Para uso pessoal apenas — não constitui aconselhamento financeiro.
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Painel pessoal · 0 a 1000 — não constitui aconselhamento financeiro.</p>
+  <p>Douglas · Porto · 2026</p>
+</footer>
+
+<script>
+// ── TAB SWITCHING ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'analise') setTimeout(initCharts, 50);
+  if (id === 'aportes') setTimeout(renderAportesChart, 50);
+  if (id === 'calendario') setTimeout(renderEventos, 50);
+  if (id === 'cotacoes') setTimeout(initCotacoes, 50);
+}
+
+// ── DOUGHNUT CHARTS ──
+let chartsInited = false;
+function initCharts() {
+  if (chartsInited) return;
+  chartsInited = true;
+
+  const DOUGHNUT_OPTS = {
+    cutout: '62%',
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 900, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed + '%' } }
+    }
+  };
+
+  new Chart(document.getElementById('chartRegional'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Global','Europa','EUA','Brasil','Privado'],
+      datasets: [{ data: [40,30,20,5,5], backgroundColor: ['#6366f1','#14b8a6','#f59e0b','#10b981','#6b7280'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: DOUGHNUT_OPTS
+  });
+
+  new Chart(document.getElementById('chartSector'), {
+    type: 'doughnut',
+    data: {
+      labels: ['ETF/Índices','Fintech','Aero/Defesa','Farmacêutico','Energia','Imobiliário','Pasta/Papel','Outros'],
+      datasets: [{ data: [35,16,8,8,8,7,8,10], backgroundColor: ['#6366f1','#14b8a6','#f59e0b','#10b981','#a78bfa','#fb923c','#34d399','#60a5fa'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: DOUGHNUT_OPTS
+  });
+
+  new Chart(document.getElementById('chartTese'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Alta convicção','ETF estrutural','Conv. moderada','Âncora'],
+      datasets: [{ data: [32,35,18,15], backgroundColor: ['#818cf8','#6366f1','#14b8a6','#6b7280'], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: DOUGHNUT_OPTS
+  });
+}
+
+// ── APORTES DATA ──
+const STORAGE_KEY = 'carteira_aportes_v1';
+
+function loadAportes() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+}
+
+function saveAportes(arr) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch {}
+}
+
+function formatEur(v) {
+  return '€ ' + Number(v).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatMes(ym) {
+  if (!ym) return '—';
+  const [y, m] = ym.split('-');
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return meses[parseInt(m) - 1] + ' ' + y;
+}
+
+// ── ADD APORTE ──
+function adicionarAporte() {
+  const mes = document.getElementById('input-mes').value;
+  const valorRaw = document.getElementById('input-valor').value;
+  const nota = document.getElementById('input-nota').value.trim();
+
+  if (!mes) { showFeedback('Selecciona o mês.', true); return; }
+  const valor = parseFloat(valorRaw);
+  if (!valorRaw || isNaN(valor) || valor <= 0) { showFeedback('Insere um valor válido.', true); return; }
+
+  const arr = loadAportes();
+  const existeIdx = arr.findIndex(a => a.mes === mes);
+
+  if (existeIdx >= 0) {
+    arr[existeIdx].valor = valor;
+    arr[existeIdx].nota = nota;
+    showFeedback('Aporte de ' + formatMes(mes) + ' actualizado.', false);
+  } else {
+    arr.push({ mes, valor, nota });
+    showFeedback('Aporte de ' + formatMes(mes) + ' adicionado!', false);
+  }
+
+  arr.sort((a, b) => a.mes.localeCompare(b.mes));
+  saveAportes(arr);
+  renderHistory();
+  renderTotals();
+  renderAportesChart();
+  document.getElementById('input-valor').value = '';
+  document.getElementById('input-nota').value = '';
+}
+
+function showFeedback(msg, isErr) {
+  const el = document.getElementById('form-feedback');
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--red)' : 'var(--green)';
+  setTimeout(() => { el.textContent = ''; }, 3000);
+}
+
+// ── DELETE ──
+function deletarAporte(mes) {
+  let arr = loadAportes().filter(a => a.mes !== mes);
+  saveAportes(arr);
+  renderHistory();
+  renderTotals();
+  renderAportesChart();
+}
+
+// ── RENDER HISTORY ──
+function renderHistory() {
+  const arr = loadAportes();
+  const el = document.getElementById('history-list');
+  if (arr.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div>Ainda sem aportes registados.<br>Usa o formulário ao lado para começar.</div></div>';
+    return;
+  }
+  el.innerHTML = [...arr].reverse().map(a => `
+    <div class="history-row">
+      <div class="h-mes">${formatMes(a.mes)}</div>
+      <div class="h-valor">${formatEur(a.valor)}</div>
+      <div class="h-nota">${a.nota || '—'}</div>
+      <button class="btn-del" onclick="deletarAporte('${a.mes}')" title="Remover">×</button>
+    </div>
+  `).join('');
+}
+
+// ── RENDER TOTALS ──
+function renderTotals() {
+  const arr = loadAportes();
+  const total = arr.reduce((s, a) => s + a.valor, 0);
+  const media = arr.length ? total / arr.length : 0;
+  const maior = arr.length ? arr.reduce((m, a) => a.valor > m.valor ? a : m, arr[0]) : null;
+
+  document.getElementById('total-investido').textContent = formatEur(total);
+  document.getElementById('total-meses').textContent = arr.length + (arr.length === 1 ? ' mês registado' : ' meses registados');
+  document.getElementById('media-mensal').textContent = formatEur(media);
+  document.getElementById('maior-aporte').textContent = maior ? formatEur(maior.valor) : '€ 0';
+  document.getElementById('maior-aporte-mes').textContent = maior ? formatMes(maior.mes) : '—';
+}
+
+// ── APORTES CHART ──
+let aportesChart = null;
+
+function renderAportesChart() {
+  const arr = loadAportes();
+  const canvas = document.getElementById('chartAportes');
+  if (!canvas) return;
+
+  const labels = arr.map(a => formatMes(a.mes));
+  const values = arr.map(a => a.valor);
+
+  // Cumulative line
+  const cumulative = [];
+  let acc = 0;
+  values.forEach(v => { acc += v; cumulative.push(parseFloat(acc.toFixed(2))); });
+
+  if (aportesChart) { aportesChart.destroy(); aportesChart = null; }
+
+  if (arr.length === 0) return;
+
+  aportesChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Aporte mensal',
+          data: values,
+          backgroundColor: 'rgba(99,102,241,0.5)',
+          borderColor: '#6366f1',
+          borderWidth: 1,
+          borderRadius: 4,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Total acumulado',
+          data: cumulative,
+          type: 'line',
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.08)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#10b981',
+          tension: 0.3,
+          fill: true,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const label = ctx.dataset.label || '';
+              const val = '€ ' + Number(ctx.parsed.y).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              return ' ' + label + ': ' + val;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7280', font: { size: 11 }, maxRotation: 45, autoSkip: false },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        },
+        y: {
+          position: 'left',
+          ticks: { color: '#6b7280', font: { size: 11 }, callback: v => '€' + Number(v).toLocaleString('pt-PT') },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        },
+        y2: {
+          position: 'right',
+          ticks: { color: '#10b981', font: { size: 11 }, callback: v => '€' + Number(v).toLocaleString('pt-PT') },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ── SET DEFAULT MONTH ──
+(function setDefaultMonth() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const el = document.getElementById('input-mes');
+  if (el) el.value = y + '-' + m;
+})();
+
+// ── INIT ──
+renderHistory();
+renderTotals();
+
+// ── CALENDÁRIO ──
+const CAL_KEY = 'carteira_eventos_v1';
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_PT_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+// Seed data — confirmed and estimated upcoming IR dates
+const SEED_EVENTS = [
+  // CONFIRMED (já passadas mas deixadas para histórico)
+  { id:'seed1',  empresa:'Nu Holdings',        ticker:'NU',   tipo:'Resultados trimestrais', data:'2026-05-14', estado:'confirmed', seed:true },
+  { id:'seed2',  empresa:'Sezzle',             ticker:'SEZL', tipo:'Resultados trimestrais', data:'2026-05-06', estado:'confirmed', seed:true },
+  { id:'seed3',  empresa:'Borr Drilling',      ticker:'BORR', tipo:'Resultados trimestrais', data:'2026-05-20', estado:'confirmed', seed:true },
+  { id:'seed4',  empresa:'BNP Paribas',        ticker:'BNP',  tipo:'Resultados trimestrais', data:'2026-04-30', estado:'confirmed', seed:true },
+  { id:'seed5',  empresa:'Flow Traders',       ticker:'FLOW', tipo:'Resultados trimestrais', data:'2026-04-24', estado:'confirmed', seed:true },
+  { id:'seed6',  empresa:'Byrna Technologies', ticker:'BYRN', tipo:'Resultados trimestrais', data:'2026-04-09', estado:'confirmed', seed:true },
+  // UPCOMING CONFIRMED
+  { id:'seed7',  empresa:'Byrna Technologies', ticker:'BYRN', tipo:'Resultados trimestrais', data:'2026-07-09', estado:'confirmed', seed:true },
+  { id:'seed8',  empresa:'Nu Holdings',        ticker:'NU',   tipo:'Resultados trimestrais', data:'2026-08-13', estado:'confirmed', seed:true },
+  { id:'seed9',  empresa:'Borr Drilling',      ticker:'BORR', tipo:'Resultados trimestrais', data:'2026-08-12', estado:'estimated', seed:true },
+  // UPCOMING ESTIMATED (based on typical cycles)
+  { id:'seed10', empresa:'Sezzle',             ticker:'SEZL', tipo:'Resultados trimestrais', data:'2026-08-06', estado:'estimated', seed:true },
+  { id:'seed11', empresa:'Embraer',            ticker:'ERJ',  tipo:'Resultados trimestrais', data:'2026-08-05', estado:'estimated', seed:true },
+  { id:'seed12', empresa:'BNP Paribas',        ticker:'BNP',  tipo:'Resultados trimestrais', data:'2026-07-30', estado:'estimated', seed:true },
+  { id:'seed13', empresa:'Flow Traders',       ticker:'FLOW', tipo:'Resultados semestrais',  data:'2026-07-30', estado:'estimated', seed:true },
+  { id:'seed14', empresa:'Faes Farma',         ticker:'FAE',  tipo:'Resultados semestrais',  data:'2026-07-22', estado:'estimated', seed:true },
+  { id:'seed15', empresa:'Navigator Company',  ticker:'NVG',  tipo:'Resultados semestrais',  data:'2026-07-28', estado:'estimated', seed:true },
+  { id:'seed16', empresa:'Sonae',              ticker:'SON',  tipo:'Resultados semestrais',  data:'2026-07-24', estado:'estimated', seed:true },
+  { id:'seed17', empresa:'Borr Drilling',      ticker:'BORR', tipo:'Resultados trimestrais', data:'2026-11-05', estado:'estimated', seed:true },
+  { id:'seed18', empresa:'Nu Holdings',        ticker:'NU',   tipo:'Resultados trimestrais', data:'2026-11-12', estado:'estimated', seed:true },
+  { id:'seed19', empresa:'Sezzle',             ticker:'SEZL', tipo:'Resultados trimestrais', data:'2026-11-05', estado:'estimated', seed:true },
+  { id:'seed20', empresa:'BNP Paribas',        ticker:'BNP',  tipo:'Resultados trimestrais', data:'2026-10-28', estado:'estimated', seed:true },
+  { id:'seed21', empresa:'Embraer',            ticker:'ERJ',  tipo:'Resultados trimestrais', data:'2026-11-05', estado:'estimated', seed:true },
+];
+
+function loadEventos() {
+  let custom = [];
+  try { custom = JSON.parse(localStorage.getItem(CAL_KEY)) || []; } catch {}
+  // Merge seed + custom, custom overrides by id
+  const customIds = new Set(custom.map(e => e.id));
+  const seedFiltered = SEED_EVENTS.filter(e => !customIds.has(e.id));
+  return [...seedFiltered, ...custom].sort((a,b) => a.data.localeCompare(b.data));
+}
+
+function saveEventos(arr) {
+  // Only save non-seed or modified
+  const custom = arr.filter(e => !e.seed);
+  try { localStorage.setItem(CAL_KEY, JSON.stringify(custom)); } catch {}
+}
+
+function formatDataPT(dateStr) {
+  if (!dateStr) return '—';
+  const [y,m,d] = dateStr.split('-');
+  return d + ' ' + MESES_PT_SHORT[parseInt(m)-1] + ' ' + y;
+}
+
+function diasAte(dateStr) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const alvo = new Date(dateStr + 'T00:00:00');
+  return Math.round((alvo - hoje) / 86400000);
+}
+
+function gcalUrl(ev) {
+  const d = ev.data.replace(/-/g,'');
+  const title = encodeURIComponent(ev.empresa + ' — ' + ev.tipo);
+  const details = encodeURIComponent('Relatório ao investidor\nTicker: ' + (ev.ticker||'') + '\nEstado: ' + (ev.estado==='confirmed'?'Confirmado':'Estimado'));
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${d}/${d}&details=${details}`;
+}
+
+function renderEventos() {
+  const todos = loadEventos();
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const futuros = todos.filter(e => new Date(e.data+'T00:00:00') >= hoje);
+  const passados = todos.filter(e => new Date(e.data+'T00:00:00') < hoje).reverse();
+
+  // Upcoming banner
+  if (futuros.length > 0) {
+    const prox = futuros[0];
+    const dias = diasAte(prox.data);
+    document.getElementById('up-days').textContent = dias === 0 ? 'HOJE' : dias;
+    document.getElementById('up-name').textContent = prox.empresa + ' — ' + prox.tipo;
+    document.getElementById('up-date').textContent = formatDataPT(prox.data) + (prox.estado === 'estimated' ? ' (estimado)' : ' (confirmado)');
+  } else {
+    document.getElementById('up-days').textContent = '—';
+    document.getElementById('up-name').textContent = 'Sem eventos futuros';
+    document.getElementById('up-date').textContent = '';
+  }
+
+  const body = document.getElementById('events-list-body');
+  let html = '';
+
+  if (futuros.length > 0) {
+    html += '<div class="ev-section-title">Próximos relatórios</div>';
+    futuros.forEach(ev => {
+      const dias = diasAte(ev.data);
+      const diasLabel = dias === 0 ? 'Hoje' : `Em ${dias} dias`;
+      html += `
+      <div class="event-row">
+        <div><div class="ev-date">${formatDataPT(ev.data)}</div><div class="ev-date-sub" style="color:${dias<=7?'#f59e0b':'var(--muted)'};">${diasLabel}</div></div>
+        <div><div class="ev-company">${ev.empresa}</div><div class="ev-ticker">${ev.ticker||''}</div></div>
+        <div class="ev-type">${ev.tipo}</div>
+        <div><span class="ev-status ${ev.estado}">${ev.estado==='confirmed'?'✓ Confirmado':'~ Estimado'}</span></div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <a class="gcal-btn" href="${gcalUrl(ev)}" target="_blank" rel="noopener" title="Adicionar ao Google Calendar">
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="14" height="13" rx="2"/><line x1="7" y1="2" x2="7" y2="6"/><line x1="13" y1="2" x2="13" y2="6"/><line x1="3" y1="9" x2="17" y2="9"/></svg>
+          </a>
+          ${!ev.seed ? `<button class="btn-del" onclick="deletarEvento('${ev.id}')" title="Remover">×</button>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+
+  if (passados.length > 0) {
+    html += '<div class="ev-section-title">Relatórios anteriores</div>';
+    passados.slice(0,8).forEach(ev => {
+      html += `
+      <div class="event-row past">
+        <div><div class="ev-date">${formatDataPT(ev.data)}</div></div>
+        <div><div class="ev-company">${ev.empresa}</div><div class="ev-ticker">${ev.ticker||''}</div></div>
+        <div class="ev-type">${ev.tipo}</div>
+        <div><span class="ev-status past">Realizado</span></div>
+        <div></div>
+      </div>`;
+    });
+  }
+
+  if (!html) {
+    html = '<div class="empty-state"><div class="empty-icon">📅</div><div>Sem eventos. Adiciona o primeiro.</div></div>';
+  }
+
+  body.innerHTML = html;
+  renderMiniCal();
+}
+
+function deletarEvento(id) {
+  let todos = loadEventos();
+  todos = todos.filter(e => e.id !== id);
+  saveEventos(todos);
+  renderEventos();
+}
+
+function adicionarEvento() {
+  const empresa = document.getElementById('ev-empresa').value.trim();
+  const tipo = document.getElementById('ev-tipo').value;
+  const data = document.getElementById('ev-data').value;
+  const estado = document.getElementById('ev-estado').value;
+  const ticker = document.getElementById('ev-ticker').value.trim().toUpperCase();
+
+  if (!empresa) { evFeedback('Indica o nome da empresa.', true); return; }
+  if (!data) { evFeedback('Selecciona uma data.', true); return; }
+
+  const custom = JSON.parse(localStorage.getItem(CAL_KEY)||'[]');
+  custom.push({ id: 'custom_' + Date.now(), empresa, ticker, tipo, data, estado, seed: false });
+  try { localStorage.setItem(CAL_KEY, JSON.stringify(custom)); } catch {}
+
+  evFeedback('Evento adicionado!', false);
+  document.getElementById('ev-empresa').value = '';
+  document.getElementById('ev-ticker').value = '';
+  renderEventos();
+}
+
+function evFeedback(msg, isErr) {
+  const el = document.getElementById('ev-feedback');
+  el.textContent = msg;
+  el.style.color = isErr ? 'var(--red)' : 'var(--green)';
+  setTimeout(() => { el.textContent = ''; }, 3000);
+}
+
+// ── MINI CALENDAR ──
+let calViewYear, calViewMonth;
+(function() {
+  const now = new Date();
+  calViewYear = now.getFullYear();
+  calViewMonth = now.getMonth();
+})();
+
+function calNav(dir) {
+  calViewMonth += dir;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+  if (calViewMonth < 0)  { calViewMonth = 11; calViewYear--; }
+  renderMiniCal();
+}
+
+function renderMiniCal() {
+  const label = document.getElementById('cal-month-label');
+  if (label) label.textContent = MESES_PT[calViewMonth] + ' ' + calViewYear;
+
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+
+  // Remove day cells (keep day name headers = first 7 children)
+  while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+  const todos = loadEventos();
+  const eventDays = new Set(
+    todos.filter(e => {
+      const d = new Date(e.data+'T00:00:00');
+      return d.getFullYear() === calViewYear && d.getMonth() === calViewMonth;
+    }).map(e => parseInt(e.data.split('-')[2]))
+  );
+  const confirmedDays = new Set(
+    todos.filter(e => {
+      const d = new Date(e.data+'T00:00:00');
+      return d.getFullYear() === calViewYear && d.getMonth() === calViewMonth && e.estado === 'confirmed';
+    }).map(e => parseInt(e.data.split('-')[2]))
+  );
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const first = new Date(calViewYear, calViewMonth, 1);
+  // Monday-based: Mon=0 ... Sun=6
+  let startDow = first.getDay(); // 0=Sun
+  startDow = startDow === 0 ? 6 : startDow - 1;
+
+  const daysInMonth = new Date(calViewYear, calViewMonth+1, 0).getDate();
+  const prevMonthDays = new Date(calViewYear, calViewMonth, 0).getDate();
+
+  // Prev month padding
+  for (let i = startDow - 1; i >= 0; i--) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    cell.textContent = prevMonthDays - i;
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    const thisDate = new Date(calViewYear, calViewMonth, d);
+    let cls = 'cal-day';
+    if (thisDate.getTime() === hoje.getTime()) cls += ' today';
+    if (eventDays.has(d)) { cls += ' has-event'; if (confirmedDays.has(d)) cls += ' confirmed'; }
+    cell.className = cls;
+    cell.textContent = d;
+    if (eventDays.has(d)) {
+      cell.title = todos.filter(e => {
+        const ed = new Date(e.data+'T00:00:00');
+        return ed.getFullYear()===calViewYear && ed.getMonth()===calViewMonth && parseInt(e.data.split('-')[2])===d;
+      }).map(e=>e.empresa).join(', ');
+    }
+    grid.appendChild(cell);
+  }
+
+  // Fill remainder
+  const total = startDow + daysInMonth;
+  const remainder = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= remainder; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    cell.textContent = d;
+    grid.appendChild(cell);
+  }
+}
+
+// Set default date to today
+(function() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  const el = document.getElementById('ev-data');
+  if (el) el.value = `${y}-${m}-${d}`;
+})();
+
+// ── COTAÇÕES VIA GOOGLE SHEETS ──
+const COT_KEY    = 'carteira_compra_v1';
+const GS_ID_KEY  = 'carteira_gsid_v1';
+
+const PORTFOLIO_ASSETS = [
+  { name: 'Borr Drilling',           ticker: 'BORR',     row: 5,  conv: 'high',   weight: 8  },
+  { name: 'Nu Holdings',             ticker: 'NU',       row: 6,  conv: 'high',   weight: 8  },
+  { name: 'Sonae',                   ticker: 'SON.LS',   row: 7,  conv: 'high',   weight: 8  },
+  { name: 'SpaceX',                  ticker: 'SPCX',     row: 8,  conv: 'high',   weight: 8  },
+  { name: 'Sezzle',                  ticker: 'SEZL',     row: 9,  conv: 'mid',    weight: 3  },
+  { name: 'Byrna Technologies',      ticker: 'BYRN',     row: 10, conv: 'mid',    weight: 3  },
+  { name: 'Faes Farma',             ticker: 'FAE.MC',   row: 11, conv: 'mid',    weight: 3  },
+  { name: 'Embraer',                 ticker: 'ERJ',      row: 12, conv: 'mid',    weight: 3  },
+  { name: 'Flow Traders',           ticker: 'FLOW.AS',  row: 13, conv: 'mid',    weight: 3  },
+  { name: 'BNP Paribas',            ticker: 'BNP.PA',   row: 14, conv: 'mid',    weight: 3  },
+  { name: 'Navigator Company',      ticker: 'NVG.LS',   row: 15, conv: 'mid',    weight: 3  },
+  { name: 'Vanguard S&P 500',       ticker: 'VUAA.L',   row: 16, conv: 'etf',    weight: 15 },
+  { name: 'iShares Dev Property',   ticker: 'IWDP.L',   row: 17, conv: 'etf',    weight: 7  },
+  { name: 'iShares Physical Gold',  ticker: 'IGLN.L',   row: 18, conv: 'anchor', weight: 10 },
+  { name: 'Vanguard Corp Bond',     ticker: 'VUSC.L',   row: 19, conv: 'anchor', weight: 5  },
+];
+
+const CONV_BADGE = {
+  high:   { cls: 'cot-weight-high',   label: 'Alta' },
+  mid:    { cls: 'cot-weight-mid',    label: 'Mod.' },
+  etf:    { cls: 'cot-weight-etf',    label: 'ETF'  },
+  anchor: { cls: 'cot-weight-anchor', label: 'Âncora' },
+};
+
+function loadCompras() {
+  try { return JSON.parse(localStorage.getItem(COT_KEY)) || {}; } catch { return {}; }
+}
+function saveCompras(obj) {
+  try { localStorage.setItem(COT_KEY, JSON.stringify(obj)); } catch {}
+}
+function getSheetsId() {
+  try { return localStorage.getItem(GS_ID_KEY) || ''; } catch { return ''; }
+}
+function setSheetsId(id) {
+  try { localStorage.setItem(GS_ID_KEY, id); } catch {}
+}
+
+function ligarGSheets() {
+  const raw = document.getElementById('gs-sheet-id').value.trim();
+  // Accept full URL or just the ID
+  const match = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  const id = match ? match[1] : raw;
+  if (!id || id.length < 20) {
+    document.getElementById('gs-status').innerHTML = '<span style="color:var(--red);">ID inválido. Verifica o URL da folha.</span>';
+    return;
+  }
+  setSheetsId(id);
+  document.getElementById('gs-status').innerHTML = '<span style="color:var(--green);">A ligar...</span>';
+  initCotacoes();
+}
+
+function desligarGSheets() {
+  setSheetsId('');
+  document.getElementById('gs-setup-card').style.display = '';
+  document.getElementById('gs-toolbar').style.display = 'none';
+  document.getElementById('gs-disclaimer').style.display = 'none';
+  document.getElementById('cot-grid').innerHTML = '';
+}
+
+function salvarPrecoCompra(ticker) {
+  const input = document.getElementById('input-compra-' + ticker);
+  if (!input) return;
+  const val = parseFloat(input.value);
+  if (isNaN(val) || val <= 0) return;
+  const compras = loadCompras();
+  compras[ticker] = val;
+  saveCompras(compras);
+  const priceEl = document.querySelector(`#cot-card-${ticker.replace(/[^a-zA-Z0-9]/g,'-')} .cot-price`);
+  if (priceEl) {
+    const p = parseFloat(priceEl.textContent.replace(/[^0-9.]/g, ''));
+    if (!isNaN(p)) updatePnL(ticker, p, val);
+  }
+}
+
+function updatePnL(ticker, price, buy) {
+  const pct = ((price - buy) / buy) * 100;
+  const abs = price - buy;
+  const cls = pct > 0 ? 'profit' : pct < 0 ? 'loss' : 'neutral';
+  const sign = pct >= 0 ? '+' : '';
+  const safeId = ticker.replace(/[^a-zA-Z0-9]/g, '-');
+  const ep = document.getElementById('pnl-pct-' + safeId);
+  const ea = document.getElementById('pnl-abs-' + safeId);
+  const eb = document.getElementById('pnl-buy-' + safeId);
+  if (ep) { ep.textContent = sign + pct.toFixed(2) + '%'; ep.className = 'pnl-value ' + cls; }
+  if (ea) { ea.textContent = sign + abs.toFixed(2);       ea.className = 'pnl-value ' + cls; }
+  if (eb) { eb.textContent = buy.toFixed(2);              eb.className = 'pnl-value neutral'; }
+}
+
+function buildCards() {
+  const compras = loadCompras();
+  const grid = document.getElementById('cot-grid');
+  if (!grid) return;
+  grid.innerHTML = PORTFOLIO_ASSETS.map(a => {
+    const badge = CONV_BADGE[a.conv];
+    const buy   = compras[a.ticker];
+    const safeId = a.ticker.replace(/[^a-zA-Z0-9]/g, '-');
+    return `
+    <div class="cot-card" id="cot-card-${safeId}">
+      <div class="cot-header">
+        <div>
+          <div class="cot-name">${a.name}</div>
+          <span class="cot-ticker-badge">${a.ticker}</span>
+        </div>
+        <div style="text-align:right;">
+          <span class="cot-weight-badge ${badge.cls}">${badge.label} · ${a.weight}%</span>
+        </div>
+      </div>
+      <div id="cot-body-${safeId}">
+        <div class="cot-loading">
+          <div class="cot-loading-dot"></div><div class="cot-loading-dot"></div><div class="cot-loading-dot"></div>
+          <span>A carregar…</span>
+        </div>
+      </div>
+      <div class="cot-divider"></div>
+      <div class="cot-pnl-row">
+        <div class="cot-pnl-item"><div class="pnl-label">Preço compra</div><div class="pnl-value neutral" id="pnl-buy-${safeId}">${buy ? buy.toFixed(2) : '—'}</div></div>
+        <div class="cot-pnl-item"><div class="pnl-label">P&L %</div><div class="pnl-value neutral" id="pnl-pct-${safeId}">—</div></div>
+        <div class="cot-pnl-item"><div class="pnl-label">P&L abs.</div><div class="pnl-value neutral" id="pnl-abs-${safeId}">—</div></div>
+      </div>
+      <div class="cot-input-row">
+        <input class="cot-input" type="number" id="input-compra-${a.ticker}" placeholder="Preço de compra" value="${buy || ''}" step="0.01" min="0" />
+        <button class="btn-save-price" onclick="salvarPrecoCompra('${a.ticker}')">Guardar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderQuoteBody(ticker, price, changePct, currency, isLive) {
+  const safeId = ticker.replace(/[^a-zA-Z0-9]/g, '-');
+  const el = document.getElementById('cot-body-' + safeId);
+  if (!el) return;
+  const dir  = changePct > 0 ? 'up' : changePct < 0 ? 'down' : 'flat';
+  const sign = changePct >= 0 ? '+' : '';
+  const badge = isLive
+    ? '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(16,185,129,0.12);color:#34d399;margin-left:6px;">Live</span>'
+    : '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(107,114,128,0.2);color:var(--muted);margin-left:6px;">Fecho</span>';
+  el.innerHTML = `
+    <div class="cot-price-row" style="align-items:center;">
+      <div class="cot-price">${price.toFixed(2)}</div>
+      <div class="cot-currency">${currency}</div>
+      ${badge}
+      <span class="cot-change ${dir}" style="margin-left:4px;">${sign}${changePct.toFixed(2)}%</span>
+    </div>`;
+  const compras = loadCompras();
+  if (compras[ticker] != null) updatePnL(ticker, price, compras[ticker]);
+}
+
+function renderQuoteError(ticker, msg) {
+  const safeId = ticker.replace(/[^a-zA-Z0-9]/g, '-');
+  const el = document.getElementById('cot-body-' + safeId);
+  if (el) el.innerHTML = `<div class="cot-error">⚠ ${msg}</div>`;
+}
+
+async function fetchAllQuotes() {
+  const id = getSheetsId();
+  if (!id) return;
+
+  const btn = document.getElementById('btn-refresh');
+  if (btn) btn.classList.add('loading');
+
+  // Reset to loading
+  PORTFOLIO_ASSETS.forEach(a => {
+    const safeId = a.ticker.replace(/[^a-zA-Z0-9]/g, '-');
+    const el = document.getElementById('cot-body-' + safeId);
+    if (el) el.innerHTML = `<div class="cot-loading"><div class="cot-loading-dot"></div><div class="cot-loading-dot"></div><div class="cot-loading-dot"></div><span>A carregar…</span></div>`;
+  });
+
+  try {
+    // Read columns E (price) and F (change%) from rows 5-19
+    // Google Sheets JSON API — public sheets, no auth needed
+    const range = encodeURIComponent('Cotações!A5:F19');
+    const url   = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=Cota%C3%A7%C3%B5es&range=A5:F19`;
+    const res   = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const text = await res.text();
+    // Google wraps response in /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+    const jsonStr = text.replace(/^[^{]*/, '').replace(/\);?\s*$/, '');
+    const data = JSON.parse(jsonStr);
+    const rows = data?.table?.rows;
+    if (!rows) throw new Error('Sem dados na folha');
+
+    rows.forEach((row, i) => {
+      const a = PORTFOLIO_ASSETS[i];
+      if (!a) return;
+      const cells = row.c || [];
+      const priceVal  = cells[4]?.v; // col E = index 4
+      const changeVal = cells[5]?.v; // col F = index 5
+
+      if (priceVal == null || priceVal === '-' || priceVal === '') {
+        renderQuoteError(a.ticker, 'Sem dados — verifica a folha');
+        return;
+      }
+      const price     = parseFloat(priceVal);
+      const changePct = changeVal != null ? parseFloat(changeVal) * 100 : 0;
+      const currency  = a.ticker.includes('.L') ? 'GBp' : a.ticker.includes('.PA') || a.ticker.includes('.AS') || a.ticker.includes('.MC') || a.ticker.includes('.LS') ? 'EUR' : 'USD';
+      renderQuoteBody(a.ticker, price, changePct, currency, true);
+    });
+
+  } catch(e) {
+    PORTFOLIO_ASSETS.forEach(a => renderQuoteError(a.ticker, 'Erro: ' + e.message.slice(0, 40)));
+  }
+
+  const now = new Date();
+  const ts = now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+  const el = document.getElementById('cot-last-update');
+  if (el) el.textContent = ts;
+  if (btn) btn.classList.remove('loading');
+}
+
+function initCotacoes() {
+  const id = getSheetsId();
+  if (id) {
+    document.getElementById('gs-setup-card').style.display = 'none';
+    document.getElementById('gs-toolbar').style.display = '';
+    document.getElementById('gs-disclaimer').style.display = '';
+    document.getElementById('gs-sheet-id').value = id;
+  }
+  buildCards();
+  if (id) fetchAllQuotes();
+}
+
+function fetchAllQuotesTD() {}
+function parseTimeSeries() {}
+function parseQuote() {}
+function fetchSymbol() {}
+</script>
+</body>
+</html>

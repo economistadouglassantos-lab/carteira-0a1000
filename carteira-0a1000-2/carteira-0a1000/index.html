@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>0 a 1000 — Painel do Investidor</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><span class="zero">0</span> a <span class="mil">1000</span></div>
+  <div class="header-meta">Economista Douglas Santos · Porto</div>
+  <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar-wrap">
+  <div class="progress-labels">
+    <span>Meta: € 1.000</span>
+    <div><span id="progress-valor">€ 0</span><span class="progress-pct-label" id="progress-pct"> · 0%</span></div>
+  </div>
+  <div class="progress-track"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+</div>
+
+<!-- TABS (desktop) -->
+<div class="tabs-bar" role="tablist" aria-label="Secções do painel">
+  <button class="tab-btn active" data-tab="resumo"     onclick="switchTab('resumo',this)"     role="tab" aria-selected="true"  aria-controls="tab-resumo">Resumo</button>
+  <button class="tab-btn"        data-tab="analise"    onclick="switchTab('analise',this)"    role="tab" aria-selected="false" aria-controls="tab-analise">Análise</button>
+  <button class="tab-btn"        data-tab="empresas"   onclick="switchTab('empresas',this)"   role="tab" aria-selected="false" aria-controls="tab-empresas">Empresas</button>
+  <button class="tab-btn"        data-tab="etfs"       onclick="switchTab('etfs',this)"       role="tab" aria-selected="false" aria-controls="tab-etfs">ETFs</button>
+  <button class="tab-btn"        data-tab="aportes"    onclick="switchTab('aportes',this)"    role="tab" aria-selected="false" aria-controls="tab-aportes">Aportes</button>
+  <button class="tab-btn"        data-tab="calendario" onclick="switchTab('calendario',this)" role="tab" aria-selected="false" aria-controls="tab-calendario">Calendário</button>
+  <button class="tab-btn"        data-tab="cotacoes"   onclick="switchTab('cotacoes',this)"   role="tab" aria-selected="false" aria-controls="tab-cotacoes">Cotações</button>
+</div>
+
+<!-- OVERLAY -->
+<div class="menu-overlay" id="menu-overlay" onclick="closeMenu()" aria-hidden="true"></div>
+
+<!-- SIDE MENU (mobile) -->
+<nav class="mobile-menu" id="mobile-menu" aria-label="Navegação principal" aria-modal="true" role="dialog">
+  <div class="mobile-menu-header">
+    <div class="logo"><span class="zero">0</span> a <span class="mil">1000</span></div>
+    <button class="mobile-menu-close" onclick="closeMenu()" aria-label="Fechar menu">×</button>
+  </div>
+  <div class="mobile-menu-user">Economista Douglas Santos</div>
+  <ul class="mobile-nav-list">
+    <li><button class="mobile-tab-btn active" data-tab="resumo"     onclick="switchTab('resumo',null)">📊 Resumo</button></li>
+    <li><button class="mobile-tab-btn"        data-tab="analise"    onclick="switchTab('analise',null)">📈 Análise</button></li>
+    <li><button class="mobile-tab-btn"        data-tab="empresas"   onclick="switchTab('empresas',null)">🏢 Empresas</button></li>
+    <li><button class="mobile-tab-btn"        data-tab="etfs"       onclick="switchTab('etfs',null)">🌍 ETFs & Âncoras</button></li>
+    <li><button class="mobile-tab-btn"        data-tab="aportes"    onclick="switchTab('aportes',null)">💶 Aportes</button></li>
+    <li><button class="mobile-tab-btn"        data-tab="calendario" onclick="switchTab('calendario',null)">📅 Calendário IR</button></li>
+    <li><button class="mobile-tab-btn"        data-tab="cotacoes"   onclick="switchTab('cotacoes',null)">💹 Cotações</button></li>
+  </ul>
+  <div class="mobile-menu-footer">Porto · 2026</div>
+</nav>
+
+<main>
+
+<!-- ── RESUMO ── -->
+<div id="tab-resumo" class="tab-panel active" role="tabpanel" aria-labelledby="tab-resumo-btn">
+  <div class="summary-grid">
+    <div class="metric-card"><div class="label">Posições</div><div class="value">16</div><div class="sub">10 acções · 5 ETF · 1 privado · 2 âncoras</div></div>
+    <div class="metric-card"><div class="label">Horizonte</div><div class="value">15 anos</div><div class="sub">Crescimento de capital</div></div>
+    <div class="metric-card"><div class="label">Alta convicção</div><div class="value">32%</div><div class="sub">Borr · Nu · Sonae · SpaceX</div></div>
+    <div class="metric-card"><div class="label">Drawdown tolerado</div><div class="value">20%</div><div class="sub">Perfil moderado-agressivo</div></div>
+  </div>
+  <div class="section-header">
+    <div class="section-label">Rankings diários</div>
+    <div id="ranking-update" class="section-meta">Liga o Google Sheets na aba Cotações</div>
+  </div>
+  <div class="rankings-grid">
+    <div class="ranking-card">
+      <div class="ranking-header up">▲ Maiores altas</div>
+      <div id="ranking-up"><div class="rank-empty">Liga o Google Sheets para ver rankings.</div></div>
+    </div>
+    <div class="ranking-card">
+      <div class="ranking-header down">▼ Maiores quedas</div>
+      <div id="ranking-down"><div class="rank-empty">Liga o Google Sheets para ver rankings.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ANÁLISE ── -->
+<div id="tab-analise" class="tab-panel" role="tabpanel">
+  <div class="section-label">Análise da carteira</div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>Exposição regional</h3>
+      <div class="chart-wrap"><canvas id="chartRegional"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>Global 40%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#0891b2"></span>Europa 30%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#d97706"></span>EUA 20%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#059669"></span>Brasil 5%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Privado 5%</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Por sector</h3>
+      <div class="chart-wrap"><canvas id="chartSector"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>ETF 35%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#0891b2"></span>Fintech 16%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#d97706"></span>Aero 8%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#059669"></span>Farmacêutico 8%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#7c3aed"></span>Energia 8%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Outros 21%</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Por tese</h3>
+      <div class="chart-wrap"><canvas id="chartTese"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#1a3a6b"></span>Alta convicção 32%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#2563eb"></span>ETF 35%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#0891b2"></span>Moderada 18%</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#6b7280"></span>Âncora 15%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:36px;">Avaliação — Bazin & FCD</div>
+  <div class="valuation-grid" id="valuation-grid"></div>
+  <div class="val-disclaimer">
+    <strong>Bazin:</strong> Preço-Teto = Dividendo ÷ 6%. Barata se Preço &lt; Teto. &nbsp;|&nbsp;
+    <strong>FCD:</strong> Valor intrínseco via fluxos descontados a 10%. &nbsp;|&nbsp;
+    Preços puxados automaticamente do Google Sheets quando ligado.
+  </div>
+</div>
+
+<!-- ── EMPRESAS ── -->
+<div id="tab-empresas" class="tab-panel" role="tabpanel">
+  <div class="section-label">Acções individuais — Relatórios ao Investidor</div>
+  <div class="companies-header"><span>Empresa</span><span>Sector</span><span>Convicção</span><span>Peso</span><span>IR</span></div>
+
+  <div class="group-label">Alta convicção — 8% cada</div>
+  <div class="company-row"><div><div class="company-name">Borr Drilling</div><div class="company-ticker">NYSE: BORR</div></div><div class="company-sector">Energia — Offshore</div><div><span class="badge badge-high">Alta</span></div><div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#1a3a6b;"></div></div></div><a class="ir-link" href="https://www.borrdrilling.com/investor-relations" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Nu Holdings</div><div class="company-ticker">NYSE: NU</div></div><div class="company-sector">Fintech — Neobank</div><div><span class="badge badge-high">Alta</span></div><div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#1a3a6b;"></div></div></div><a class="ir-link" href="https://ir.nu.com.br/" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Sonae</div><div class="company-ticker">ELI: SON</div></div><div class="company-sector">Retalho / Conglomerado</div><div><span class="badge badge-high">Alta</span></div><div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#1a3a6b;"></div></div></div><a class="ir-link" href="https://www.sonae.pt/en/investors/" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">SpaceX</div><div class="company-ticker">NASDAQ: SPCX</div></div><div class="company-sector">Aeroespacial</div><div><span class="badge badge-high">Alta</span></div><div class="weight-bar-wrap"><div class="weight-text">8%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#1a3a6b;"></div></div></div><a class="ir-link" href="https://ir.spacex.com/" target="_blank" rel="noopener">IR ↗</a></div>
+
+  <div class="divider"></div>
+  <div class="group-label">Convicção moderada — 3% cada</div>
+  <div class="company-row"><div><div class="company-name">Sezzle</div><div class="company-ticker">NASDAQ: SEZL</div></div><div class="company-sector">Fintech — BNPL</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://investors.sezzle.com/" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Byrna Technologies</div><div class="company-ticker">NASDAQ: BYRN</div></div><div class="company-sector">Defesa não-letal</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://ir.byrna.com/" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Faes Farma</div><div class="company-ticker">BME: FAE</div></div><div class="company-sector">Farmacêutico</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://www.faesfarma.com/en/investors/" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Embraer</div><div class="company-ticker">NYSE: ERJ</div></div><div class="company-sector">Aeroespacial</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://ri.embraer.com.br/en/" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Flow Traders</div><div class="company-ticker">ENXTAM: FLOW</div></div><div class="company-sector">Market Maker ETF</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://www.flowtraders.com/investors" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">BNP Paribas</div><div class="company-ticker">ENXTPA: BNP</div></div><div class="company-sector">Banca</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://invest.bnpparibas/en" target="_blank" rel="noopener">IR ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Navigator Company</div><div class="company-ticker">ELI: NVG</div></div><div class="company-sector">Pasta e Papel</div><div><span class="badge badge-mid">Mod.</span></div><div class="weight-bar-wrap"><div class="weight-text">3%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:37%;background:#2563eb;"></div></div></div><a class="ir-link" href="https://www.thenavigatorcompany.com/investor-relations" target="_blank" rel="noopener">IR ↗</a></div>
+</div>
+
+<!-- ── ETFs ── -->
+<div id="tab-etfs" class="tab-panel" role="tabpanel">
+  <div class="section-label">ETFs, âncoras e instrumentos estruturais</div>
+  <div class="companies-header"><span>Instrumento</span><span>Classe</span><span>Tipo</span><span>Peso</span><span>Ficha</span></div>
+  <div class="group-label">ETF estrutural — motor de crescimento</div>
+  <div class="company-row"><div><div class="company-name">Vanguard S&amp;P 500 UCITS (ACC)</div><div class="company-ticker">VUAA · LSE</div></div><div class="company-sector">Acções EUA Large Cap</div><div><span class="badge badge-etf">ETF</span></div><div class="weight-bar-wrap"><div class="weight-text">15%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:100%;background:#d97706;"></div></div></div><a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/equity/9505/s-p-500-ucits-etf-usd-accumulating" target="_blank" rel="noopener">Ficha ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Vanguard FTSE Emerging Markets (Dist)</div><div class="company-ticker">VFEA · LSE</div></div><div class="company-sector">Acções Emergentes Global</div><div><span class="badge badge-etf">ETF</span></div><div class="weight-bar-wrap"><div class="weight-text">13%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:87%;background:#d97706;"></div></div></div><a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/equity/9680/ftse-emerging-markets-ucits-etf-distributing" target="_blank" rel="noopener">Ficha ↗</a></div>
+  <div class="company-row"><div><div class="company-name">iShares Dev. Mkts Property Yield (Dist)</div><div class="company-ticker">IWDP · LSE</div></div><div class="company-sector">Imobiliário — REIT Global</div><div><span class="badge badge-etf">ETF</span></div><div class="weight-bar-wrap"><div class="weight-text">7%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:47%;background:#d97706;"></div></div></div><a class="ir-link" href="https://www.ishares.com/uk/individual/en/products/251780/IWDP" target="_blank" rel="noopener">Ficha ↗</a></div>
+  <div class="divider"></div>
+  <div class="group-label">Âncoras — preservação e amortecedor</div>
+  <div class="company-row"><div><div class="company-name">iShares Physical Gold ETC</div><div class="company-ticker">IGLN · LSE</div></div><div class="company-sector">Ouro físico</div><div><span class="badge badge-anchor">Âncora</span></div><div class="weight-bar-wrap"><div class="weight-text">10%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:67%;background:#6b7280;"></div></div></div><a class="ir-link" href="https://www.ishares.com/uk/individual/en/products/258441/SGLN" target="_blank" rel="noopener">Ficha ↗</a></div>
+  <div class="company-row"><div><div class="company-name">Vanguard USD Corporate 1-3Y Bond (Dist)</div><div class="company-ticker">VUSC · LSE</div></div><div class="company-sector">Obrigações Curto Prazo USD</div><div><span class="badge badge-anchor">Âncora</span></div><div class="weight-bar-wrap"><div class="weight-text">5%</div><div class="weight-bar-bg"><div class="weight-bar-fill" style="width:33%;background:#6b7280;"></div></div></div><a class="ir-link" href="https://www.vanguard.co.uk/professional/product/etf/bond/9534/usd-corporate-1-3-year-bond-ucits-etf-distributing" target="_blank" rel="noopener">Ficha ↗</a></div>
+</div>
+
+<!-- ── APORTES ── -->
+<div id="tab-aportes" class="tab-panel" role="tabpanel">
+  <div class="section-label">Aportes</div>
+  <div class="aportes-layout">
+    <div class="aporte-form-card">
+      <h2>Registar aporte</h2>
+
+      <!-- Modo toggle -->
+      <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border2);border-radius:8px;overflow:hidden;">
+        <button id="btn-modo-semanal" onclick="setModo('semanal')" style="flex:1;padding:8px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:var(--accent);color:#fff;font-family:'Oswald',sans-serif;letter-spacing:.04em;text-transform:uppercase;">Semanal (Ter)</button>
+        <button id="btn-modo-mensal"  onclick="setModo('mensal')"  style="flex:1;padding:8px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:var(--surface2);color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:.04em;text-transform:uppercase;">Mensal</button>
+      </div>
+
+      <div id="form-semanal">
+        <div class="form-group"><label>Data (terça-feira)</label><input type="date" id="input-data-semana" /></div>
+      </div>
+      <div id="form-mensal" style="display:none;">
+        <div class="form-group"><label>Mês e ano</label><input type="month" id="input-mes" /></div>
+      </div>
+
+      <div class="form-group"><label>Valor investido (€)</label><input type="number" id="input-valor" placeholder="0.00" min="0" step="0.01" /></div>
+
+      <div class="form-group">
+        <label>Activo investido <span style="color:var(--muted);font-weight:400;">(opcional)</span></label>
+        <select id="input-aporte-ticker" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:13px;padding:9px 12px;outline:none;appearance:none;">
+          <option value="">— Selecciona o activo —</option>
+          <option value="BORR">Borr Drilling (BORR)</option>
+          <option value="NU">Nu Holdings (NU)</option>
+          <option value="SON.LS">Sonae (SON)</option>
+          <option value="SPCX">SpaceX (SPCX)</option>
+          <option value="SEZL">Sezzle (SEZL)</option>
+          <option value="BYRN">Byrna Technologies (BYRN)</option>
+          <option value="FAE.MC">Faes Farma (FAE)</option>
+          <option value="ERJ">Embraer (ERJ)</option>
+          <option value="FLOW.AS">Flow Traders (FLOW)</option>
+          <option value="BNP.PA">BNP Paribas (BNP)</option>
+          <option value="NVG.LS">Navigator Company (NVG)</option>
+          <option value="VUAA.L">Vanguard S&amp;P 500 (VUAA)</option>
+          <option value="VFEA.L">Vanguard Emerging Mkts (VFEA)</option>
+          <option value="IWDP.L">iShares Property (IWDP)</option>
+          <option value="IGLN.L">iShares Gold (IGLN)</option>
+          <option value="VUSC.L">Vanguard Corp Bond (VUSC)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Preço de compra <span style="color:var(--muted);font-weight:400;">(para valorização)</span></label>
+        <input type="number" id="input-preco-compra" placeholder="Ex: 12.50" min="0" step="0.0001" />
+      </div>
+
+      <div class="form-group"><label>Nota (opcional)</label><input type="text" id="input-nota" placeholder="Ex: reforço carteira" maxlength="60" /></div>
+
+      <button class="btn-add" onclick="adicionarAporte()">+ Adicionar aporte</button>
+      <div id="form-feedback" style="margin-top:10px;font-size:12px;text-align:center;min-height:18px;"></div>
+
+      <div style="margin-top:16px;padding:10px 12px;background:var(--surface2);border-radius:6px;font-size:11px;color:var(--muted);line-height:1.6;">
+        💡 A <strong>valorização</strong> é calculada automaticamente com o preço actual do Google Sheets quando ligado. Sem Sheets, aparece "Sem cotação".
+      </div>
+    </div>
+
+    <div>
+      <div class="totals-strip">
+        <div class="total-card"><div class="t-label">Total investido</div><div class="t-value" id="total-investido">€ 0</div><div class="t-sub" id="total-meses">0 registos</div></div>
+        <div class="total-card"><div class="t-label">Média por aporte</div><div class="t-value" id="media-mensal">€ 0</div><div class="t-sub">por registo</div></div>
+        <div class="total-card"><div class="t-label">Maior aporte</div><div class="t-value" id="maior-aporte">€ 0</div><div class="t-sub" id="maior-aporte-mes">—</div></div>
+      </div>
+      <div class="aportes-chart-card">
+        <h3>Evolução dos aportes</h3>
+        <div class="aportes-chart-wrap"><canvas id="chartAportes"></canvas></div>
+      </div>
+      <div class="history-card">
+        <div class="history-header"><span>Data / Activo</span><span>Valor</span><span>Preço compra</span><span>Valorização</span><span></span></div>
+        <div id="history-list"><div class="empty-state"><div class="empty-icon">📊</div><div>Ainda sem aportes registados.</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CALENDÁRIO ── -->
+<div id="tab-calendario" class="tab-panel" role="tabpanel">
+  <div class="section-label">Calendário de relatórios ao investidor</div>
+  <div id="upcoming-banner" class="upcoming-banner">
+    <div><div class="up-days" id="up-days">—</div><div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px;">dias</div></div>
+    <div><div class="up-label">Próximo relatório</div><div class="up-name" id="up-name">A carregar…</div><div class="up-date" id="up-date"></div></div>
+  </div>
+  <div class="cal-layout">
+    <div>
+      <div class="mini-cal">
+        <div class="mini-cal-header">
+          <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+          <span id="cal-month-label"></span>
+          <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid">
+          <div class="cal-day-name">Seg</div><div class="cal-day-name">Ter</div>
+          <div class="cal-day-name">Qua</div><div class="cal-day-name">Qui</div>
+          <div class="cal-day-name">Sex</div><div class="cal-day-name">Sáb</div>
+          <div class="cal-day-name">Dom</div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);"><span style="width:8px;height:8px;border-radius:50%;background:#059669;display:inline-block;"></span>Confirmado</div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);"><span style="width:8px;height:8px;border-radius:50%;background:#2563eb;display:inline-block;"></span>Estimado</div>
+        </div>
+      </div>
+      <div class="cal-form-card">
+        <h2>Adicionar evento</h2>
+        <div class="form-group"><label>Empresa</label><input type="text" id="ev-empresa" placeholder="Ex: Sezzle" /></div>
+        <div class="form-group"><label>Tipo</label>
+          <select id="ev-tipo">
+            <option>Resultados trimestrais</option><option>Resultados semestrais</option>
+            <option>Resultados anuais</option><option>Assembleia geral</option>
+            <option>Capital markets day</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Data</label><input type="date" id="ev-data" /></div>
+        <div class="form-group"><label>Estado</label>
+          <select id="ev-estado"><option value="confirmed">Confirmado</option><option value="estimated">Estimado</option></select>
+        </div>
+        <div class="form-group"><label>Ticker (opcional)</label><input type="text" id="ev-ticker" placeholder="Ex: SEZL" /></div>
+        <button class="btn-add" onclick="adicionarEvento()">+ Adicionar</button>
+        <div id="ev-feedback" style="margin-top:10px;font-size:12px;text-align:center;min-height:18px;"></div>
+      </div>
+    </div>
+    <div>
+      <div class="events-list">
+        <div class="events-list-header"><span>Data</span><span>Empresa</span><span>Tipo</span><span>Estado</span><span></span></div>
+        <div id="events-list-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── COTAÇÕES ── -->
+<div id="tab-cotacoes" class="tab-panel" role="tabpanel">
+  <div id="gs-setup-card" class="chart-card" style="margin-bottom:20px;">
+    <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:220px;">
+        <p style="font-family:'Oswald',sans-serif;font-size:14px;font-weight:500;color:var(--accent);margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em;">Ligação ao Google Sheets</p>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.7;">
+          1. Importa o ficheiro .xlsx para o Google Sheets<br>
+          2. Partilha: Qualquer pessoa com o link → Visualizador<br>
+          3. Copia o ID do URL e cola aqui
+        </p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="gs-sheet-id" placeholder="ID da folha" style="flex:1;min-width:180px;font-size:12px;font-family:monospace;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;color:var(--text);padding:9px 12px;outline:none;" />
+          <button class="btn-add" style="width:auto;padding:9px 16px;margin:0;" onclick="ligarGSheets()">Ligar</button>
+        </div>
+        <div id="gs-status" style="font-size:12px;margin-top:8px;min-height:16px;"></div>
+      </div>
+      <div style="background:var(--surface2);border-radius:8px;padding:12px 16px;font-size:11px;color:var(--muted);line-height:1.8;flex-shrink:0;">
+        <strong style="color:var(--text);display:block;margin-bottom:4px;">Como encontrar o ID</strong>
+        URL: .../spreadsheets/d/<strong style="color:var(--accent2);">[ID]</strong>/edit
+      </div>
+    </div>
+  </div>
+
+  <div class="cotacoes-toolbar" id="gs-toolbar" style="display:none;">
+    <div>
+      <div class="section-label" style="margin-bottom:4px;">Cotações via Google Sheets</div>
+      <div class="cotacoes-meta">GOOGLEFINANCE · Actualizado: <span id="cot-last-update">—</span></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn-refresh" id="btn-refresh" onclick="fetchAllQuotes()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Actualizar
+      </button>
+      <button onclick="desligarGSheets()" style="background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;padding:7px 12px;cursor:pointer;">Alterar</button>
+    </div>
+  </div>
+
+  <div class="cot-grid" id="cot-grid"></div>
+  <div class="cot-disclaimer" id="gs-disclaimer" style="display:none;">
+    Preços via GOOGLEFINANCE · delay ~15 min · Actualiza aportes e análise automaticamente.
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <p style="font-family:'Oswald',sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.8);">Economista Douglas Santos</p>
+  <p>Porto · 2026</p>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/aportes.js"></script>
+<script src="js/calendario.js"></script>
+<script src="js/analise.js"></script>
+<script src="js/cotacoes.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
