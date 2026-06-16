@@ -35,6 +35,7 @@
     font-size: 14px;
     line-height: 1.6;
     min-height: 100vh;
+    overflow-x: hidden;
   }
 
   /* HEADER */
@@ -103,7 +104,7 @@
   .tab-panel.active { display: block; }
 
   /* MAIN */
-  main { max-width: 1280px; margin: 0 auto; padding: 40px 48px 80px; }
+  main { max-width: 1280px; width: 100%; margin: 0 auto; padding: 40px 48px 80px; }
 
   .section-label {
     font-family: 'Oswald', sans-serif;
@@ -1051,15 +1052,72 @@
   @media (max-width: 900px) {
     .rankings-grid { grid-template-columns: 1fr; }
     .valuation-grid { grid-template-columns: 1fr; }
-  }
-    main { padding: 28px 20px 60px; }
-    .summary-grid { grid-template-columns: repeat(2,1fr); }
-    .charts-grid { grid-template-columns: 1fr; }
-    .companies-header { display: none; }
-    .company-row { grid-template-columns: 1fr; gap: 8px; }
+    .cal-layout { grid-template-columns: 1fr; }
+    .cal-form-card { position: static; }
     .aportes-layout { grid-template-columns: 1fr; }
     .aporte-form-card { position: static; }
-    .totals-strip { grid-template-columns: 1fr; }
+    .totals-strip { grid-template-columns: repeat(2, 1fr); }
+    .cot-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    html, body { overflow-x: hidden; width: 100%; }
+
+    header { padding: 0 16px; height: 56px; }
+    #progress-bar-wrap { padding: 7px 16px 9px; top: 56px; }
+    .tabs-bar { padding: 0 0 0 4px; top: 108px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 12px 14px; font-size: 12px; flex-shrink: 0; }
+
+    main { padding: 20px 16px 60px; }
+    section { margin-bottom: 32px; }
+
+    .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric-card { padding: 14px 16px; }
+    .metric-card .value { font-size: 22px; }
+
+    .charts-grid { grid-template-columns: 1fr; gap: 14px; }
+    .chart-wrap { height: 180px; }
+
+    .companies-header { display: none; }
+    .company-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 6px;
+      padding: 12px 14px;
+    }
+    .company-row > div:nth-child(3),
+    .company-row > div:nth-child(4) { display: none; }
+
+    .rankings-grid { grid-template-columns: 1fr; gap: 12px; }
+    .valuation-grid { grid-template-columns: 1fr; }
+
+    .aportes-layout { grid-template-columns: 1fr; }
+    .aporte-form-card { position: static; padding: 18px; }
+    .totals-strip { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .aportes-chart-wrap { height: 160px; }
+    .history-header { display: none; }
+    .history-row { grid-template-columns: 1fr 1fr 24px; gap: 6px; }
+    .history-row .h-nota { display: none; }
+
+    .cal-layout { grid-template-columns: 1fr; }
+    .cal-form-card { position: static; }
+
+    .events-list-header { display: none; }
+    .event-row { grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 4px; padding: 10px 14px; }
+    .ev-type, .ev-status { font-size: 11px; }
+
+    .cot-grid { grid-template-columns: 1fr; }
+    .gs-setup-card { padding: 16px; }
+
+    .footer { padding: 16px; flex-direction: column; gap: 4px; text-align: center; }
+
+    .logo { font-size: 18px; }
+    .header-meta { display: none; }
+
+    .section-label { font-size: 11px; }
   }
 </style>
 </head>
