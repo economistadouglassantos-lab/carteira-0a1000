@@ -73,7 +73,7 @@
     gap: 0;
     background: #fff;
     position: sticky;
-    top: 64px;
+    top: 112px;
     z-index: 99;
     box-shadow: 0 1px 4px rgba(0,0,0,0.07);
   }
@@ -656,9 +656,9 @@
   .ev-type { font-size: 11px; color: var(--muted); }
 
   .ev-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 8px; border-radius: 6px; }
-  .ev-status.confirmed { background: rgba(16,185,129,0.12); color: #34d399; }
+  .ev-status.confirmed { background: #dcfce7; color: #065f46; }
   .ev-status.estimated { background: rgba(245,158,11,0.12); color: #fbbf24; }
-  .ev-status.past { background: rgba(107,114,128,0.15); color: #9ca3af; }
+  .ev-status.past { background: #f3f4f6; color: #6b7280; }
 
   .gcal-btn {
     display: inline-flex;
@@ -779,9 +779,9 @@
     border-radius: 5px;
   }
 
-  .cot-change.up { background: rgba(16,185,129,0.12); color: #34d399; }
-  .cot-change.down { background: rgba(239,68,68,0.1); color: #f87171; }
-  .cot-change.flat { background: rgba(107,114,128,0.15); color: #9ca3af; }
+  .cot-change.up { background: #dcfce7; color: #065f46; }
+  .cot-change.down { background: #fee2e2; color: #991b1b; }
+  .cot-change.flat { background: #f3f4f6; color: #6b7280; }
 
   .cot-divider { height: 1px; background: var(--border); margin: 12px 0; }
 
@@ -789,8 +789,8 @@
 
   .cot-pnl-item .pnl-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
   .cot-pnl-item .pnl-value { font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 500; }
-  .pnl-value.profit { color: #34d399; }
-  .pnl-value.loss { color: #f87171; }
+  .pnl-value.profit { color: #065f46; }
+  .pnl-value.loss { color: #991b1b; }
   .pnl-value.neutral { color: var(--muted); }
 
   .cot-input-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
@@ -847,7 +847,7 @@
 
   @keyframes pulse { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
 
-  .cot-error { font-size: 11px; color: #f87171; margin-top: 4px; }
+  .cot-error { font-size: 11px; color: #991b1b; margin-top: 4px; }
 
   .cot-weight-badge {
     font-size: 10px;
@@ -859,7 +859,7 @@
   .cot-weight-high { background: rgba(129,140,248,0.15); color: #818cf8; }
   .cot-weight-mid  { background: rgba(20,184,166,0.12); color: #2dd4bf; }
   .cot-weight-etf  { background: rgba(245,158,11,0.12); color: #fbbf24; }
-  .cot-weight-anchor { background: rgba(107,114,128,0.15); color: #9ca3af; }
+  .cot-weight-anchor { background: #f3f4f6; color: #6b7280; }
 
   .cot-disclaimer {
     margin-top: 20px;
@@ -886,9 +886,10 @@
 
   .ranking-card {
     background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   }
 
   .ranking-header {
@@ -904,8 +905,8 @@
     border-bottom: 1px solid var(--border);
   }
 
-  .ranking-header.up   { border-top: 3px solid #10b981; color: #34d399; }
-  .ranking-header.down { border-top: 3px solid #CC0000; color: #FF4444; }
+  .ranking-header.up   { border-top: 3px solid #059669; color: #065f46; background: #f0fdf4; }
+  .ranking-header.down { border-top: 3px solid #dc2626; color: #991b1b; background: #fef2f2; }
 
   .ranking-row {
     display: flex;
@@ -928,8 +929,8 @@
     min-width: 60px;
     text-align: right;
   }
-  .rank-pct.up   { color: #34d399; }
-  .rank-pct.down { color: #f87171; }
+  .rank-pct.up   { color: #065f46; }
+  .rank-pct.down { color: #991b1b; }
   .rank-empty { padding: 20px 18px; font-size: 12px; color: var(--muted); text-align: center; }
 
   /* ===== BAZIN / FCD ===== */
@@ -998,9 +999,9 @@
     font-weight: 500;
     text-align: center;
   }
-  .val-verdict.compra  { background: rgba(16,185,129,0.12); color: #34d399; }
+  .val-verdict.compra  { background: #dcfce7; color: #065f46; }
   .val-verdict.neutra  { background: rgba(245,158,11,0.12);  color: #fbbf24; }
-  .val-verdict.cara    { background: rgba(239,68,68,0.10);   color: #f87171; }
+  .val-verdict.cara    { background: rgba(239,68,68,0.10);   color: #991b1b; }
   .val-verdict.fcd     { background: rgba(129,140,248,0.12); color: #818cf8; }
   .val-verdict.pendente{ background: rgba(107,114,128,0.12); color: #9ca3af; }
 
@@ -1070,6 +1071,33 @@
   </div>
   <div class="header-meta">Carteira pessoal · Porto · 2026</div>
 </header>
+
+<!-- BARRA DE PROGRESSO 0 a 1000 -->
+<div id="progress-bar-wrap" style="
+  position: sticky;
+  top: 64px;
+  z-index: 100;
+  background: #0f2554;
+  padding: 8px 48px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+    <span style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Meta: € 1.000</span>
+    <div style="display:flex;align-items:baseline;gap:6px;">
+      <span id="progress-valor" style="font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:#fff;">€ 0</span>
+      <span id="progress-pct" style="font-family:'Oswald',sans-serif;font-size:11px;color:rgba(255,255,255,0.5);">0%</span>
+    </div>
+  </div>
+  <div style="height:7px;background:rgba(255,255,255,0.12);border-radius:99px;overflow:hidden;">
+    <div id="progress-fill" style="
+      height:100%;
+      width:0%;
+      border-radius:99px;
+      background: linear-gradient(90deg, #2563eb 0%, #3b82f6 40%, #60a5fa 70%, #34d399 100%);
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    "></div>
+  </div>
+</div>
 
 <div class="tabs-bar">
   <button class="tab-btn active" onclick="switchTab('resumo', this)">Resumo</button>
@@ -1809,6 +1837,9 @@ function renderTotals() {
   if (elMed) elMed.textContent = formatEur(media);
   if (elMaior) elMaior.textContent = maior ? formatEur(maior.valor) : '€ 0';
   if (elMaiorMes) elMaiorMes.textContent = maior ? formatLabel(maior.mes) : '—';
+
+  // Update progress bar whenever totals change
+  updateProgressBar();
 }
 
 // ── APORTES CHART ──
@@ -1913,9 +1944,27 @@ function renderAportesChart() {
   }
 })();
 
+// ── PROGRESS BAR ──
+const META = 1000;
+
+function updateProgressBar() {
+  const arr   = loadAportes();
+  const total = arr.reduce((s, a) => s + a.valor, 0);
+  const pct   = Math.min(100, (total / META) * 100);
+
+  const fill  = document.getElementById('progress-fill');
+  const valor = document.getElementById('progress-valor');
+  const pctEl = document.getElementById('progress-pct');
+
+  if (fill)  fill.style.width  = pct.toFixed(1) + '%';
+  if (valor) valor.textContent = '€ ' + Number(total).toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (pctEl) pctEl.textContent = pct.toFixed(1) + '%';
+}
+
 // ── INIT ──
 renderHistory();
 renderTotals();
+updateProgressBar();
 
 // ── CALENDÁRIO ──
 const CAL_KEY = 'carteira_eventos_v1';
@@ -2317,7 +2366,7 @@ function renderQuoteBody(ticker, price, changePct, currency, isLive) {
   const dir  = changePct > 0 ? 'up' : changePct < 0 ? 'down' : 'flat';
   const sign = changePct >= 0 ? '+' : '';
   const badge = isLive
-    ? '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(16,185,129,0.12);color:#34d399;margin-left:6px;">Live</span>'
+    ? '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(16,185,129,0.12);color:#065f46;margin-left:6px;">Live</span>'
     : '<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(107,114,128,0.2);color:var(--muted);margin-left:6px;">Fecho</span>';
   el.innerHTML = `
     <div class="cot-price-row" style="align-items:center;">
