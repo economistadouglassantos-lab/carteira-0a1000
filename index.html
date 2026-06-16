@@ -1733,7 +1733,7 @@ function initCharts() {
   });
 
   // Render Bazin/FCD valuation cards
-  setTimeout(renderValuationCards, 50);
+  setTimeout(() => renderValuationCards(window.gsPrices || {}), 50);
 }
 
 // ── APORTES DATA ──
@@ -2487,7 +2487,14 @@ async function fetchAllQuotes() {
       const changePct = changeVal != null ? parseFloat(changeVal) * 100 : 0;
       const currency  = a.ticker.includes('.L') ? 'GBp' : a.ticker.includes('.PA') || a.ticker.includes('.AS') || a.ticker.includes('.MC') || a.ticker.includes('.LS') ? 'EUR' : 'USD';
       renderQuoteBody(a.ticker, price, changePct, currency, true);
+
+      // Store price globally for Bazin/FCD auto-populate
+      if (!window.gsPrices) window.gsPrices = {};
+      window.gsPrices[a.ticker] = { price, currency };
     });
+
+    // Auto-populate valuation cards with live prices
+    if (window.gsPrices) renderValuationCards(window.gsPrices);
 
   } catch(e) {
     PORTFOLIO_ASSETS.forEach(a => renderQuoteError(a.ticker, 'Erro: ' + e.message.slice(0, 40)));
@@ -2630,19 +2637,26 @@ function calcValuation(ticker) {
   const price = parseFloat(input.value);
   if (!price || isNaN(price)) return;
   saveValuationPrice(ticker, price);
-  renderValuationCards();
+  renderValuationCards(window.gsPrices || {});
 }
 
-function renderValuationCards() {
-  const grid   = document.getElementById('valuation-grid');
+function renderValuationCards(livePrices) {
+  const grid = document.getElementById('valuation-grid');
   if (!grid) return;
-  const prices = loadValuationPrices();
+  const savedPrices = loadValuationPrices();
+  const prices = livePrices || window.gsPrices || {};
 
   grid.innerHTML = VALUATION_DATA.map(d => {
-    const safeId  = d.ticker.replace(/[^a-zA-Z0-9]/g, '-');
-    const current = prices[d.ticker] || null;
-    let teto, tetoLabel, metodoLabel;
+    const safeId = d.ticker.replace(/[^a-zA-Z0-9]/g, '-');
 
+    // Priority: live from Sheets → saved manually
+    const liveEntry  = prices[d.ticker];
+    const livePrice  = liveEntry?.price ?? null;
+    const savedPrice = savedPrices[d.ticker] ?? null;
+    const current    = livePrice ?? savedPrice ?? null;
+    const isLive     = livePrice != null;
+
+    let teto, tetoLabel, metodoLabel;
     if (d.method === 'bazin') {
       teto       = calcBazin(d.dpa);
       tetoLabel  = d.currency + ' ' + teto.toFixed(2);
@@ -2652,25 +2666,32 @@ function renderValuationCards() {
       tetoLabel  = '$ ' + (teto ? teto.toFixed(2) : '—');
       metodoLabel= 'FCD simplificado';
     } else {
-      teto       = null;
-      tetoLabel  = '—';
-      metodoLabel= 'FCD';
+      teto = null; tetoLabel = '—'; metodoLabel = 'FCD';
     }
 
     const v = verdict(current, teto, d.method);
 
+    const priceDisplay = current
+      ? `${d.method === 'bazin' ? d.currency : '$'} ${current.toFixed(2)}
+         ${isLive ? '<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:#dcfce7;color:#065f46;margin-left:4px;">Sheets</span>' : '<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:#f3f4f6;color:#6b7280;margin-left:4px;">Manual</span>'}`
+      : '—';
+
     const rows = d.method === 'bazin' ? `
       <div class="val-row"><span class="val-label">Dividendo anual/acção</span><span class="val-value">${d.currency} ${d.dpa.toFixed(3)}</span></div>
       <div class="val-row"><span class="val-label">Preço-Teto (÷6%)</span><span class="val-value">${tetoLabel}</span></div>
-      <div class="val-row"><span class="val-label">Preço actual</span><span class="val-value">${current ? (d.currency + ' ' + current.toFixed(2)) : '—'}</span></div>
+      <div class="val-row"><span class="val-label">Preço actual</span><span class="val-value">${priceDisplay}</span></div>
     ` : d.eps ? `
       <div class="val-row"><span class="val-label">EPS (TTM)</span><span class="val-value">$ ${d.eps.toFixed(2)}</span></div>
       <div class="val-row"><span class="val-label">Crescimento esperado</span><span class="val-value">${(d.g*100).toFixed(0)}% /ano</span></div>
       <div class="val-row"><span class="val-label">Valor intrínseco (FCD)</span><span class="val-value">${tetoLabel}</span></div>
-      <div class="val-row"><span class="val-label">Preço actual</span><span class="val-value">${current ? ('$ ' + current.toFixed(2)) : '—'}</span></div>
+      <div class="val-row"><span class="val-label">Preço actual</span><span class="val-value">${priceDisplay}</span></div>
     ` : `
       <div class="val-row"><span class="val-label">Dados</span><span class="val-value" style="color:var(--muted)">Indisponíveis</span></div>
     `;
+
+    // Input shows live price if available (read-only hint), else editable
+    const inputVal   = current ? current.toFixed(2) : '';
+    const inputHint  = isLive ? 'Preço via Google Sheets' : `Preço actual (${d.method === 'bazin' ? d.currency : '$'})`;
 
     return `
     <div class="valuation-card ${v.cls}">
@@ -2680,9 +2701,10 @@ function renderValuationCards() {
       <div class="val-verdict ${v.cls}">${v.label}</div>
       <div class="val-input-row">
         <input class="val-input" type="number" id="val-input-${safeId}"
-          placeholder="Preço actual (${d.method === 'bazin' ? d.currency : '$'})"
-          value="${current || ''}" step="0.01" min="0" />
-        <button class="btn-calc" onclick="calcValuation('${d.ticker}')">Calcular</button>
+          placeholder="${inputHint}"
+          value="${inputVal}" step="0.01" min="0"
+          ${isLive ? 'style="background:#f0fdf4;color:#065f46;border-color:#bbf7d0;"' : ''} />
+        <button class="btn-calc" onclick="calcValuation('${d.ticker}')" ${isLive ? 'style="display:none"' : ''}>Calcular</button>
       </div>
       <div style="font-size:10px;color:var(--muted);margin-top:8px;">${d.note}</div>
     </div>`;
